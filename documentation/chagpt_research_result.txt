@@ -1,0 +1,1444 @@
+Skip to content
+Chat history
+You said:
+
+
+## Research Request: Android-Only Flutter Plugin with llama.cpp (January 2025)
+
+I need you to research and provide up-to-date information (as of January 2025 or latest available) for building a Flutter plugin that wraps llama.cpp for Android only. Please provide:
+
+### 1. Flutter Plugin Architecture (Android-Only)
+- Latest Flutter plugin structure for Android-only packages
+- Best practices for pubspec.yaml configuration (platform: android only)
+- Current Android embedding API (V2 or V3?)
+- Recommended project structure for single-platform plugins
+
+### 2. Native Communication Methods
+Research these options and recommend the best for 2025:
+
+**Option A: Method Channels**
+- Current best practices
+- Performance considerations
+- Example code structure
+- When to use vs other options
+
+**Option B: Pigeon**
+- Latest Pigeon version (check pub.dev)
+- Setup and configuration for Android-only
+- Code generation workflow
+- Advantages over Method Channels
+- Example usage with Kotlin
+
+**Option C: FFI (dart:ffi)**
+- Current state of FFI support for Android
+- JNI vs direct FFI considerations
+- Performance vs Method Channels
+- Example structure
+
+**Recommendation**: Which method would you recommend for a text generation streaming API in 2025?
+
+### 3. Android Native Development Stack
+- Minimum Android SDK version recommended for AI/ML workloads (2025)
+- Kotlin version compatibility with latest Flutter
+- Android Gradle Plugin (AGP) version recommendations
+- NDK version for C++ compilation (latest stable)
+- CMake version (latest stable vs what Flutter/Android supports)
+
+### 4. CMake and C++ Build System
+- Latest CMake best practices for Android NDK
+- How to link external C++ libraries (llama.cpp)
+- ARM64 optimization flags for 2025 devices
+- Example CMakeLists.txt structure for Flutter plugin
+- How to handle C++17/20 with current NDK
+
+### 5. Streaming Data from Native to Dart
+Research best approaches for streaming tokens:
+
+**Option A: EventChannel**
+- Current implementation patterns
+- Performance characteristics
+- Example code (Kotlin + Dart)
+- Memory management concerns
+
+**Option B: StreamHandler**
+- Latest patterns
+- Comparison with EventChannel
+
+**Option C: Platform-specific streams**
+- Kotlin Flow/Coroutines → Dart Stream
+- Performance considerations
+
+**Recommendation**: Best practice for real-time token streaming in 2025?
+
+### 6. Background Processing
+- WorkManager vs Foreground Service for long inference
+- Kotlin Coroutines best practices with Flutter
+- How to prevent Android from killing inference process
+- Example code for background-safe inference
+
+### 7. Memory Management
+- Current Android memory limits for apps
+- How to handle large models (4-8GB GGUF files)
+- Memory-mapped files on Android
+- OOM prevention strategies
+- Example code for safe model loading
+
+### 8. llama.cpp Integration
+- Latest llama.cpp API patterns (check GitHub as of Jan 2025)
+- Common build flags for Android ARM64
+- Required compiler flags for optimal performance
+- Known issues with llama.cpp on Android (if any)
+- Example JNI wrapper patterns
+
+### 9. Permissions and Security
+- Android 15 requirements (16KB page size, permissions)
+- Storage permissions for model files in 2025
+- Scoped storage considerations
+- Security best practices for AI models
+
+### 10. Testing and Debugging
+- How to debug C++ code in Flutter Android plugins
+- Android Studio setup for native debugging
+- Logging best practices (native → Dart)
+- Example test structure
+
+### 11. Performance Optimization
+- Current ARM64 SIMD optimization flags
+- Android-specific optimizations for inference
+- Battery usage considerations
+- Thermal management for sustained inference
+
+### 12. Package Structure Best Practices
+Provide example structure:
+
+llama_flutter_android/
+├── android/
+│   ├── build.gradle
+│   ├── CMakeLists.txt
+│   └── src/main/
+│       ├── kotlin/
+│       └── cpp/
+├── lib/
+└── pubspec.yaml
+
+
+
+With explanations for each part.
+
+### 13. Dependencies to Research
+Please check and provide latest versions:
+
+**Pub.dev packages:**
+- pigeon - latest version and changelog
+- ffi - latest version
+- path_provider - for model storage
+- Any other recommended packages
+
+**Android dependencies:**
+- Kotlin stdlib version
+- Coroutines version
+- What else is commonly needed?
+
+### 14. Example Code Requests
+
+Please provide minimal example code for:
+1. A Pigeon definition for text generation API
+2. Kotlin implementation with streaming
+3. CMakeLists.txt for linking C++ library
+4. EventChannel streaming example
+5. Proper resource cleanup (closing models)
+
+### 15. Common Pitfalls
+- Known issues with Flutter + Android NDK in 2025
+- Common mistakes when building Android-only plugins
+- Memory leak patterns to avoid
+- Performance gotchas
+
+### 16. Documentation Links
+Please provide official links (that should work in Jan 2025):
+- Flutter plugin development guide
+- Android NDK documentation
+- Pigeon documentation
+- Best tutorials or examples you can find
+
+---
+
+## Output Format
+
+Please structure your response as:
+
+### Section 1: Recommended Architecture
+[Your recommendation with reasoning]
+
+### Section 2: Native Communication
+[Comparison table + recommendation]
+
+### Section 3: Build System
+[Latest versions + example configs]
+
+[Continue for all sections...]
+
+### Final Recommendation Summary
+- Suggested tech stack
+- Estimated complexity
+- Potential issues to watch for
+
+---
+
+**Important**: Please prioritize information from 2024-2025. If something has changed recently (like new Android APIs, Flutter updates, etc.), please highlight it.
+
+Thank you!
+ChatGPT said:
+
+This is an excellent and thorough request. Before I begin, could you confirm a few quick details to ensure I tailor everything precisely:
+
+    Are you targeting only ARM64 Android devices, or do you also want compatibility with x86 for emulators?
+
+    Do you want support for streaming inference only, or should I also include examples for non-streaming (batch) generation?
+
+    Should the plugin be built with null safety and Dart 3 in mind (assumed standard in 2025)?
+
+    Are you planning to release this plugin publicly (e.g., on pub.dev), or is it for private/internal use?
+
+Once I have this info, I’ll dive into the full research task and assemble a detailed, structured report for you.
+You said:
+I plan to create appbundle and submit to playstore. 
+streaming mainly
+latest with null safety 
+internal testing and release later to public
+ChatGPT said:
+
+Great, I’ll begin researching the latest best practices and implementation details for building a Flutter Android-only plugin wrapping llama.cpp with streaming support. I’ll prioritize up-to-date tooling (as of January 2025), null safety, Play Store compatibility, and an architecture suitable for internal testing and future public release.
+
+I’ll let you know as soon as the full report is ready for review.
+
+Flutter Android Plugin for llama.cpp with Streaming Support
+Section 1: Recommended Architecture
+
+For an Android‐only Flutter plugin, use the Flutter plugin template with Android platform only (e.g. flutter create --template=plugin --platforms=android llama_flutter_android). This yields a structure with lib/ (Dart API), android/ (native code), and example/ app
+reddit.com
+. In pubspec.yaml, specify only Android under the plugin.platforms map. For example:
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example.llamaplugin
+        pluginClass: LlamaPlugin
+
+This declares the Android package and plugin class and omits iOS entirely
+docs.flutter.dev
+. Use the new Android embedding API (V2): implement the FlutterPlugin interface in your Kotlin class, and register your method/event channels in onAttachedToEngine. The legacy embedding (V1) is deprecated. For instance, a Kotlin plugin class typically looks like:
+
+class LlamaPlugin: FlutterPlugin, MethodCallHandler {
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel = MethodChannel(binding.binaryMessenger, "llama")
+    channel.setMethodCallHandler(this)
+  }
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel.setMethodCallHandler(null)
+  }
+  // ... 
+}
+
+(The above uses the V2 API with FlutterPlugin
+docs.flutter.dev
+.) In summary, use a single‐platform plugin: one Dart interface, one android/src/main/ folder (with Kotlin/Java code and C++ in cpp/ if needed), and no iOS/web folders. Keep the example app for Android testing.
+Section 2: Native Communication (MethodChannel vs Pigeon vs FFI)
+Method	Description	Performance	Use Case
+MethodChannel	Dart ↔ Android via asynchronous platform messages. Define a MethodChannel("name") on both sides and send invokeMethod calls.	Moderate overhead – messages are serialized and parsed, asynchronous by default
+reddit.com
+.	Good for simple calls or configuration. Avoid sending high-frequency data (tokens) one by one. Easy to implement without code generation.
+Pigeon (code-gen)	Generates type-safe Dart/Kotlin bindings for platform calls. You define a Dart API and Pigeon creates the boilerplate channels and data classes.	Similar overhead to MethodChannel (since it still uses message codecs), but less boilerplate. Serialization is efficient binary codec.	Best when you want strong typing and less manual coding. Use Pigeon to auto-generate host Dart and Kotlin code. Great for structured APIs.
+dart:ffi (C FFI)	Directly call native (C/C++) functions from Dart. Bypasses platform channels by loading a shared library (.so).	Lowest overhead per call – direct FFI calls (~100ns)
+reddit.com
+. Can be synchronous. JNI overhead eliminated.	Best for heavy computations (ML inference, high-throughput loops). Use when you have a C/C++ library (like llama.cpp) and need maximal speed. More complex setup (CMake, ABIs).
+
+MethodChannel (Option A) – This is the classic plugin bridge. Use a unique channel name, handle calls in onMethodCall, and return via the Result callback
+reddit.com
+reddit.com
+. Best practices (2025): always run heavy work on a background thread (e.g. Kotlin CoroutineScope(Dispatchers.Default)) and switch back to main thread for result.success. MethodChannel calls involve encoding/decoding, so high-frequency calls (like per-token streaming) will incur latency
+reddit.com
+medium.flutterdevs.com
+. Use it for discrete method calls (e.g. loading model, one-off generate) but not for thousands of rapid updates. Example structure:
+
+class LlamaPlugin: FlutterPlugin, MethodCallHandler {
+  private lateinit var channel : MethodChannel
+  override fun onAttachedToEngine(b: FlutterPlugin.FlutterPluginBinding) {
+    channel = MethodChannel(b.binaryMessenger, "llama")
+    channel.setMethodCallHandler(this)
+  }
+  override fun onMethodCall(call: MethodCall, result: Result) {
+    when (call.method) {
+      "initModel" -> { /* init llama model */ result.success(null) }
+      "generateToken" -> { /* compute next token */ result.success(token) }
+      else -> result.notImplemented()
+    }
+  }
+}
+
+Pigeon (Option B) – Pigeon 26.0.1 (Dec 2024)
+pub.dev
+is the latest. It auto-generates Dart/Kotlin code from annotated Dart definitions. Setup: add dev_dependencies: pigeon: ^26.0.1 in pubspec, write a Dart API file and run dart run pigeon --input pigeons/api.dart --dart_out lib/api.dart --kotlin_out android/src/main/kotlin/com/example/MessageApi.kt --kotlin_options package=com.example.llamaplugin (paths as appropriate). Pigeon can generate host APIs and EventChannel APIs. Advantages: type-safe, compile-time checks, no magic strings, and fewer bugs. It’s still using platform channels under the hood, so performance is similar to manual channels
+medium.com
+. Example Pigeon definition:
+
+import 'package:pigeon/pigeon.dart';
+
+class GenRequest { String prompt; int maxTokens; }
+class GenResponse { String token; bool done; }
+
+@HostApi()
+abstract class LlamaApi {
+  void initModel(String modelPath, double temperature);
+  GenResponse nextToken(GenRequest req);
+}
+
+After running pigeon, implement the generated interface in Kotlin. Pigeon also supports streaming via @EventChannelApi(), generating a Stream in Dart. For example:
+
+@EventChannelApi()
+abstract class TokenStreamApi {
+  @async  // indicates streams/events
+  @EventChannel(hostClass: "TokenStreamApiImpl")
+  TokenEvent startStream(GenRequest req);
+}
+
+Ffi (Option C) – Dart FFI (dart:ffi) lets Dart directly call compiled C/C++ functions. Android fully supports FFI (only dynamic libs). With Flutter, use flutter create --template=plugin_ffi to scaffold (see docs)
+docs.flutter.dev
+. You compile llama.cpp into a .so and load it (e.g. final dylib = DynamicLibrary.open("libllama.so")). FFI bypasses the JSON-method-channel layer; calls are direct and can be synchronous
+reddit.com
+. For example, you can typedef llama_init = Void Function(Pointer<Utf8>); and final llamaInit = lib.lookupFunction<llama_init, void Function(Pointer<Utf8>)>("llama_init_from_file").
+
+Recommendation: For a token-streaming text generation plugin, combine FFI with an EventChannel. Use FFI to load and run llama.cpp (max performance) and use a Dart Stream (via EventChannel or Pigeon event) to receive tokens as they are generated. This leverages FFI’s speed for inference and EventChannel’s bidirectional streaming. In practice, you might spawn a background coroutine in Kotlin to call the native inference loop (via FFI/JNI) and push each token through an EventChannel. This hybrid approach gives low latency with robust streaming.
+Section 3: Android Native Development Stack
+
+    Minimum SDK: To ensure 64-bit support (required by Play Store) and enable newer NDK/NNAPI features, use at least Android 5.0 (API 21) as minSdk. For AI/ML you might choose API 26+ to leverage NNAPI and improved memory handling, but API 21 is the lowest that satisfies 64-bit rules. New apps should target recent APIs (Android 15/API 35 by late 2025).
+
+    Kotlin version: Flutter recommends Kotlin 1.5.31 or newer (due to Gradle plugin requirements)
+    docs.flutter.dev
+    . In practice, use the latest stable (e.g. Kotlin 1.8.x or 1.9.x) compatible with your Android Gradle Plugin.
+
+    Android Gradle Plugin (AGP): Use a recent AGP (8.x). As of 2024, AGP 8.13.0 is available
+    developer.android.com
+    . AGP 8.4+ supports Android 14+ SDKs. Note AGP version ties to Gradle version (e.g. AGP 8.13 requires Gradle 8.13
+    developer.android.com
+    ).
+
+    NDK version: Use the latest stable Android NDK r29 (or LTS r27). NDK r29 (29.0.x) is current stable
+    developer.android.com
+    . In android/build.gradle, specify e.g. ndkVersion "29.0.14206865" to ensure consistency. NDK r28+ supports 16KB pages by default (see below)
+    medium.com
+    .
+
+    CMake version: The NDK toolchain now requires at least CMake 3.10
+    github.com
+    . Use a modern CMake (>=3.10, e.g. 3.22 bundled with recent NDKs). In android/build.gradle you can let Gradle manage CMake; ensure your cmake block has version "3.18" or higher if needed. Recent NDKs bundle CMake 3.22+.
+
+Section 4: CMake and C++ Build System
+
+Follow Android NDK CMake best practices: use the NDK’s toolchain file (android.toolchain.cmake) which Gradle’s externalNativeBuild does by default
+developer.android.com
+. In your plugin’s android/CMakeLists.txt, specify:
+
+cmake_minimum_required(VERSION 3.18)
+project(llama_plugin LANGUAGES CXX)
+
+add_library(llama_plugin SHARED
+    src/main/cpp/llama_plugin.cpp
+    src/main/cpp/llama.cpp      # include llama.cpp source or link to library
+)
+
+target_include_directories(llama_plugin PRIVATE
+    src/main/cpp/include   # if llama headers are here
+)
+
+# Set C++ standard (NDK default is C++14)
+target_compile_features(llama_plugin PRIVATE cxx_std_17)  # or set CXX_STANDARD 17
+
+# Define compiler flags for performance
+target_compile_options(llama_plugin PRIVATE 
+    -O3 -funroll-loops -march=armv8-a -mtune=generic
+    -DGGML_CPU_AARCH64   # enable ARMv8 intrinsics
+    -DGGML_SVE           # enable ARM SVE (on ARMv9+)
+)
+
+find_library(log-lib log)
+target_link_libraries(llama_plugin PRIVATE ${log-lib})
+
+Linking llama.cpp: You can compile llama.cpp directly into your plugin (as above), or build it as a static library and use target_link_libraries(llama_plugin llama-lib). Just ensure to include required system libs (e.g. -landroid -ldl -lm if needed). Use target_link_libraries to link against log and any other Android system libs.
+
+Handle ARM64 optimizations: enable NEON/SVE (as above) and high optimization. llama.cpp’s recommended flags include -DGGML_CPU_AARCH64 (Armv8 support) and -DGGML_SVE for newer ARMv9 cores
+blog.steelph0enix.dev
+. Also consider enabling -ffast-math cautiously if acceptable.
+
+For C++17/20: NDK r18+ supports C++17. As CMake defaults to C++14, explicitly request C++17: e.g. set(CMAKE_CXX_STANDARD 17) or use target_compile_features(llama_plugin PRIVATE cxx_std_17)
+developer.android.com
+. C++20 support is limited; it’s safest to stick with C++17 for now. Use libc++ (NDK default) for the C++ runtime.
+Section 5: Streaming Data from Native to Dart
+
+EventChannel (Option A): The Flutter EventChannel is built for continuous streams
+medium.flutterdevs.com
+. On Android, set up EventChannel(messenger, "llama/token_stream") and implement StreamHandler. In onListen, start your token generation (e.g. a coroutine) and push events via events.success(token). In Dart, use EventChannel('llama/token_stream').receiveBroadcastStream().listen(...). Example pattern:
+
+// In Kotlin plugin
+class LlamaPlugin: FlutterPlugin, EventChannel.StreamHandler {
+  private lateinit var eventChannel: EventChannel
+  private var tokenJob: Job? = null
+
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    eventChannel = EventChannel(binding.binaryMessenger, "llama/token_stream")
+    eventChannel.setStreamHandler(this)
+  }
+
+  override fun onListen(args: Any?, events: EventChannel.EventSink?) {
+    val prompt = (args as? Map<*,*>)?.get("prompt") as? String ?: ""
+    tokenJob = CoroutineScope(Dispatchers.Default).launch {
+      for (token in runInference(prompt)) {
+        withContext(Dispatchers.Main) { events?.success(token) }
+      }
+      events?.endOfStream()
+    }
+  }
+  override fun onCancel(args: Any?) {
+    tokenJob?.cancel()
+  }
+}
+
+This streams each token via the EventChannel. Performance: EventChannels incur overhead per event (similar to MethodChannel)
+medium.flutterdevs.com
+. For very rapid streams, consider batching or binary codecs if needed. Ensure to call events.endOfStream() when done to close the stream. Memory: Avoid retaining the EventSink beyond its lifetime (clear it on onCancel) to prevent leaks.
+
+StreamHandler (Option B): In Android’s plugin API, EventChannel.setStreamHandler(...) uses an interface called StreamHandler. There is no separate “StreamHandler” mechanism beyond this. Essentially, implementing EventChannel.StreamHandler as above is how streaming is done on Android.
+
+Platform-specific streams (Option C): You can use Kotlin Flow/Coroutines as the token source and bridge it to Dart. For example, launch a coroutine that emits tokens into an EventSink. Kotlin’s Flow itself isn’t directly exposed to Dart, but you could collect the flow and send each element via the EventChannel. This is more about implementation (benefits from coroutines’ cancellation and backpressure) rather than a different Flutter API.
+
+Recommendation: For real-time token streaming in 2025, use an EventChannel (or Pigeon @EventChannel) to send tokens asynchronously, backed by native code. Compute tokens on a background coroutine (using FFI/jni). This combo (native→Dart stream) is the standard pattern. The generated Dart code can consume the stream as a Stream<String> for tokens.
+Section 6: Background Processing
+
+For long-running inference that should survive app backgrounding:
+
+    Foreground Service: Use a Foreground Service when you need continuous execution with user awareness. This involves creating a Service with startForeground(notificationId, notification) so Android won’t kill it easily
+    medium.com
+    . You must show a persistent notification. This is ideal for very long or indefinite inference.
+
+    WorkManager: Use WorkManager for deferrable or periodic work. WorkManager’s WorkRequest (especially CoroutineWorker) can perform background tasks on a background thread, and if you need it to continue even under battery optimizations you can call setForegroundAsync()
+    medium.com
+    . However, WorkManager jobs are not truly real-time; they may be delayed by the OS. For streaming inference, WorkManager is less suitable unless you break the inference into chunks.
+
+    Coroutines with Flutter: In your plugin, perform inference on a Dispatchers.IO/Default coroutine
+    stackoverflow.com
+    . For any Flutter-facing callback (MethodChannel/EventChannel), switch to Dispatchers.Main. For example, use scope.launch(Dispatchers.IO) { val result = runInference(); withContext(Dispatchers.Main) { channel.success(result) } }. Importantly, always call invokeMethod or event.success on the main thread
+    stackoverflow.com
+    .
+
+    Preventing Kill: To prevent the system from stopping your task, use a ForegroundService (as above). You can also acquire a partial WakeLock (CPU) while computing. In a simpler case, run the work on a background thread while the app is in foreground. If you use WorkManager, it will handle scheduling but may still be paused in Doze mode unless you use setRequiresBatteryNotLow(false) etc.
+
+    Example (Foreground Service): In Kotlin, create a Service and call startForeground(1, notification). Perform inference in a coroutine within the Service. This keeps your process alive even if the UI is gone.
+
+Section 7: Memory Management
+
+Android app heap is limited (varies by device)
+developer.android.com
+. Exceeding it triggers OOM. Typical heap might be a few hundred MB on phones; avoid loading multi-GB models into the Java heap. Strategies:
+
+    Memory-mapped files: Load the llama model via memory-mapping (mmap) so it stays off-heap. Llama.cpp supports streaming from disk to avoid full load. On Android, you can use native mmap or a ByteBuffer. This way large model data doesn’t count against the Java heap.
+
+    Check available memory: Use ActivityManager.getMemoryInfo() to monitor memory
+    developer.android.com
+    . In a plugin, call ActivityManager via platform channel or use NDK’s android_meminfo.
+
+    onTrimMemory: Implement ComponentCallbacks2.onTrimMemory() in your Android code to free caches or reduce memory usage under pressure
+    developer.android.com
+    .
+
+    Release resources: When done, free the llama context (call llama_free or equivalent) to release its memory. Also null out any large buffers.
+
+    Large model strategy: Do not package 4–8GB models in the APK. Store them in external storage or download them at runtime. Use app-specific storage (getExternalFilesDir) so you don’t need storage permission. Use streaming inference so only parts of the model are in memory at a time. Always guard against OutOfMemory by catching and cleaning up if needed.
+
+Example safe load (pseudo-code):
+
+val memInfo = ActivityManager.MemoryInfo()
+( context.getSystemService(ACTIVITY_SERVICE) as ActivityManager )
+    .getMemoryInfo(memInfo)
+val available = memInfo.availMem
+if (modelFile.length() < available) {
+    loadModel(modelFile)
+} else {
+    throw RuntimeException("Not enough memory for model")
+}
+
+Section 8: llama.cpp Integration
+
+The llama.cpp C API provides functions to load models and generate text. Typical usage (C/C++ side) is:
+
+    llama_context * ctx = llama_init_from_file(modelPath, params); – load model with given context parameters.
+
+    llama_eval(ctx, input_tokens, n_tok, past_length, n_threads); – evaluate a batch of tokens.
+
+    Sampling functions like llama_sample_top_p, llama_sample_top_k, etc., to choose next tokens from ctx->logits.
+
+    llama_tokenize to convert strings to tokens and llama_token_to_str to get text output.
+
+    When done, llama_free(ctx);.
+
+On Android, you’ll wrap these in JNI or FFI. E.g., an extern "C" JNI function might call llama_init_from_file and return a pointer as a jlong. Then another JNI call can perform llama_eval and return the next token.
+
+Build flags: For ARM64 (aarch64), compile with optimizations and enable llama-specific flags. Use -DGGML_CPU_AARCH64=1 to enable Armv8 instructions, and -DGGML_SVE=1 if targeting newer ARMv9 chips
+blog.steelph0enix.dev
+. Also compile with -O3 -funroll-loops. Include -march=armv8-a or let NDK’s default target. If NDK < r28, add -Wl,-z,max-page-size=16384 when linking to support 16KB pages (Android 15)
+medium.com
+.
+
+Known issues: Llama.cpp on Android may hit alignment or page-size bugs on older NDKs. Use NDK r28+ to avoid page-size problems
+medium.com
+. Ensure no hardcoded PAGE_SIZE=4096 in any code. Also check integer width on Android (llama uses size_t). There is community experience showing llama.cpp runs on ARM64 if built properly; follow any recent Android-specific build guides (e.g. on GitHub) if available.
+
+JNI wrapper example (pattern):
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_example_llamaplugin_Llama_nativeInit(JNIEnv* env, jclass cls, jstring path) {
+    const char* model_path = env->GetStringUTFChars(path, 0);
+    llama_context* ctx = llama_init_from_file(model_path, /*params*/);
+    env->ReleaseStringUTFChars(path, model_path);
+    return reinterpret_cast<jlong>(ctx);
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_example_llamaplugin_Llama_nativeGenerate(JNIEnv* env, jclass, jlong ctxPtr) {
+    llama_context* ctx = reinterpret_cast<llama_context*>(ctxPtr);
+    int token = llama_sample_next(ctx); // hypothetical
+    const char* str = llama_token_to_str(ctx, token);
+    return env->NewStringUTF(str);
+}
+
+Remember to manage ctxPtr lifecycle (free it later with another JNI call).
+Section 9: Permissions and Security
+
+    Android 15 (API 35) and 16KB pages: Android 15 supports 16 KB page sizes. By Nov 1, 2025, Play Store requires apps targeting API 35+ to support 16KB pages
+    medium.com
+    . NDK r28+ already aligns to 16KB by default. If using older NDKs, add linker flag -Wl,-z,max-page-size=16384
+    medium.com
+    . Ensure no code assumes 4096-byte pages: replace any #define PAGE_SIZE 4096 with a runtime query (e.g. sysconf(_SC_PAGESIZE))
+    medium.com
+    .
+
+    Storage for models: Use app-specific storage or the Storage Access Framework (SAF). For large model files, place them in context.getExternalFilesDir() or prompt the user to pick a location via SAF. This avoids needing READ_EXTERNAL_STORAGE. If your plugin targets Android 11+, scoped storage means your app’s own directories are accessible without permission
+    developer.android.com
+    . If you must read arbitrary external paths, you’ll need MANAGE_EXTERNAL_STORAGE (All files access), which has Play Store restrictions, so avoid it unless truly necessary.
+
+    Scoped Storage: On Android 11+, use getExternalFilesDirs() for external directories
+    developer.android.com
+    . Don’t rely on WRITE_EXTERNAL_STORAGE. For example, save downloaded models to getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).
+
+    Security best practices: Keep native libraries non-exported (set <application android:extractNativeLibs="false"> in AndroidManifest.xml to avoid unpacking). Load models securely (validate any user-supplied model path). Minimize permissions: the plugin itself likely only needs INTERNET (if downloading models) and storage (if outside app storage). Use Flutter’s flutter_secure_storage or Android KeyStore if encryption needed. Finally, ensure all native code is built with appropriate -fvisibility=hidden or use __attribute__((used)) for symbols to prevent strip (see Flutter’s FFI docs)
+    docs.flutter.dev
+    .
+
+Section 10: Testing and Debugging
+
+    C++ Debugging: In Android Studio, enable native debugging. In your Run Configuration for the app, tick “Debug” and open the C++ code in the IDE. Set breakpoints in your .cpp files. When running in debug mode, Android Studio attaches LLDB. Alternatively, use flutter run --debug and in Android Studio use Attach Debugger to the running process. Ensure your native library is compiled with debug symbols (Gradle debug build by default does this).
+
+    Android Studio setup: Open the android folder as an Android project. In the Android Studio “Run/Debug Configurations” panel, under your Flutter app, check “Enable native debugging” or similar. After launching, you can step through both Dart (in Dart layer) and Kotlin/Java/C++.
+
+    Logging: Use Log.i/w/e(TAG, ...) in Kotlin or __android_log_print in C++ to print logs to Logcat. In Dart, listen via debugPrint() or view the console. Tag messages clearly (e.g. “LlamaPlugin”). You can also send logs across channels for in-app display, but Logcat is simplest.
+
+    Testing structure: Follow Flutter’s plugin testing guidelines
+    docs.flutter.dev
+    . For Dart code, write unit tests in test/. For integration, use the plugin’s example/integration_test/. For Android native code, write JUnit tests under android/src/test/. (The template even includes a sample android/src/test/ExampleUnitTest.java.) In these tests you can call your plugin’s methods directly on the JVM.
+
+    Resource cleanup: In onDetachedFromEngine, clean up everything. For example:
+
+override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+  channel.setMethodCallHandler(null)
+  eventChannel.setStreamHandler(null)
+  // If using JNI/FFI, free the native model
+  nativeFreeModel()
+}
+
+This avoids leaks (note the pattern in [10†L320-L327]). Also null out any static references. If using Flow or Streams, cancel them.
+Section 11: Performance Optimization
+
+    ARM64 SIMD: Use NEON and SVE optimizations. Compile with -DGGML_CPU_AARCH64 (enables NEON) and, if targeting the newest chips (Armv9), -DGGML_SVE
+    blog.steelph0enix.dev
+    . Enable -O3, and consider -ffast-math for math (with caution). NDK’s compiler defaults to -march=armv8-a for arm64.
+
+    Threading: Utilize multiple cores. llama.cpp supports multi-threading (n_threads parameter). Spawn Kotlin coroutines or threads to call llama_eval in parallel if possible. On Android 11+, binding CPU cores may improve sustained throughput.
+
+    Battery/Thermal: Model inference is CPU/GPU intensive. For mobile, monitor battery (maybe reduce clock rate by setting setRenderThreadCpuAffinityMask or scale down threads if overheated). Avoid running at full performance continuously; consider adding delays or processing small batches to let the device cool.
+
+    Profiling: Use Android Profiler to check CPU & memory during inference. Identify hot spots (maybe data copying) and optimize (e.g. reuse buffers, avoid GC during streaming).
+
+    Gotchas: Avoid converting data too often between Dart and native. For instance, sending each token as a Dart string across channels incurs GC and UTF-8 conversion. It may be more efficient to batch tokens or use byte arrays if needed. Also watch out for JNI local reference limits if looping in JNI (use ReleaseStringUTFChars promptly).
+
+Section 12: Package Structure Best Practices
+
+A recommended plugin folder structure:
+
+llama_flutter_android/
+├── android/
+│   ├── build.gradle
+│   ├── CMakeLists.txt
+│   └── src/main/
+│       ├── kotlin/        # Kotlin plugin code (MyPlugin.kt)
+│       └── cpp/           # Native C++ code (llama.cpp, wrapper.cpp)
+├── lib/
+│   └── llama_flutter_android.dart  # Dart API
+└── pubspec.yaml
+
+    android/: Contains all Android-side code. build.gradle defines Android configs (compileSdk, ndkVersion, dependencies). CMakeLists.txt lives here for building native code. Under src/main/kotlin/… put your plugin class and any JNI wrapper classes. Under src/main/cpp/… place llama.cpp source and any JNI glue code.
+
+    lib/: Exposes a Dart class or functions that call into the platform (e.g. via MethodChannel.invokeMethod). This is the public API for Flutter apps. Keep this thin and null-safe.
+
+    pubspec.yaml: Declares name, version, and the plugin details. Under flutter: use plugin.platforms.android to point to your package/class
+    docs.flutter.dev
+    . Include necessary dependencies (e.g. ffi).
+
+    example/ (not shown above): A sample Flutter app demonstrating use of the plugin. It should only include Android since it’s Android-only.
+
+    README.md: Document usage, setup steps, and any permissions required.
+
+Section 13: Dependencies to Research
+
+    Pub.dev packages:
+
+        pigeon: The latest version is 26.0.1 (as of late 2024)
+        pub.dev
+        . Changelog highlights stable data classes and event support.
+
+        ffi: Latest version 2.1.4 (Nov 2023)
+        pub.dev
+        .
+
+        path_provider: Latest version 2.1.5 (Dec 2023)
+        pub.dev
+        ; use this to locate storage directories for model files.
+
+        Others: Consider android_intent_plus if launching platform activities, or permission_handler only if needing dangerous permissions (but we try to avoid them). For long tasks, workmanager exists for Flutter but on Android native side you'd normally use the platform APIs.
+
+    Android libraries:
+
+        Kotlin stdlib: Use whatever matches your Kotlin plugin (e.g. 1.8.20 or above). In Gradle, ext.kotlin_version = "1.8.20".
+
+        Kotlin Coroutines: A recent stable version, e.g. org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.x or 1.7.x. If using Android-specific, kotlinx-coroutines-android.
+
+        AndroidX components: Your android/build.gradle should use AndroidX libraries (no legacy support lib). For example, implementation "androidx.annotation:annotation:1.6.0" if needed. Also include implementation "androidx.core:core-ktx:1.9.0" etc. These come by default in Flutter’s Android template.
+
+        Others: If using Jetpack (e.g. for Lifecycle, WorkManager), add androidx.work:work-runtime-ktx:2.8.0 or newer
+        medium.com
+        . For a ForegroundService, ensure you have implementation "androidx.core:core-ktx", which includes NotificationCompat.
+
+Section 14: Example Code
+
+1. Pigeon definition (Dart) – define the host API for text generation:
+
+// api.dart
+import 'package:pigeon/pigeon.dart';
+
+class GenerationRequest { 
+  String? prompt; 
+  int? maxTokens; 
+}
+
+class GenerationResponse { 
+  String? token; 
+  bool done; 
+}
+
+@HostApi()
+abstract class LlamaApi {
+  void initModel(String? modelPath, double? temperature);
+  GenerationResponse generateToken(GenerationRequest req);
+}
+
+Run Pigeon to generate Dart and Kotlin code. The host Kotlin implementation would then handle initModel and generateToken.
+
+2. Kotlin implementation with streaming – using EventChannel for streaming tokens:
+
+// in android/src/main/kotlin/com/example/llamaplugin/LlamaPlugin.kt
+
+class LlamaPlugin: FlutterPlugin, EventChannel.StreamHandler {
+  private lateinit var eventChannel: EventChannel
+  private var tokenJob: Job? = null
+
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    eventChannel = EventChannel(binding.binaryMessenger, "llama/token_stream")
+    eventChannel.setStreamHandler(this)
+    // Also set up MethodChannel or Pigeon-generated API as needed
+  }
+
+  override fun onListen(args: Any?, events: EventChannel.EventSink?) {
+    val params = args as? Map<*, *> 
+    val prompt = params?.get("prompt") as? String ?: ""
+    // Launch a coroutine to generate tokens
+    tokenJob = CoroutineScope(Dispatchers.Default).launch {
+      for (token in runLlamaInference(prompt)) {  // assume this yields tokens
+        withContext(Dispatchers.Main) {
+          events?.success(token)  // send token to Dart
+        }
+      }
+      events?.endOfStream() // close stream when done
+    }
+  }
+
+  override fun onCancel(args: Any?) {
+    tokenJob?.cancel()  // stop streaming
+  }
+
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    eventChannel.setStreamHandler(null)
+    tokenJob?.cancel()
+  }
+}
+
+3. CMakeLists.txt – linking llama.cpp library:
+
+# android/CMakeLists.txt
+cmake_minimum_required(VERSION 3.18)
+project(llama_plugin LANGUAGES C CXX)
+
+add_library(llama_plugin SHARED
+    src/main/cpp/llama_plugin.cpp
+    src/main/cpp/llama.cpp      # add llama.cpp source (or link separately)
+)
+
+target_include_directories(llama_plugin PRIVATE
+    src/main/cpp/include
+)
+
+# Use C++17
+target_compile_features(llama_plugin PRIVATE cxx_std_17)
+
+# Optimization and flags
+target_compile_options(llama_plugin PRIVATE 
+    -O3 -funroll-loops 
+    -DGGML_CPU_AARCH64 -DGGML_SVE
+)
+
+find_library(log-lib log)
+target_link_libraries(llama_plugin PRIVATE ${log-lib})
+
+This builds a libllama_plugin.so that can be loaded by the plugin.
+
+4. EventChannel streaming example (Dart) – consuming the stream:
+
+// in lib/llama_flutter_android.dart
+
+import 'package:flutter/services.dart';
+
+class LlamaFlutter {
+  static const _streamChannel = EventChannel('llama/token_stream');
+
+  /// Returns a broadcast stream of tokens from native.
+  Stream<String> getTokenStream(String prompt) {
+    return _streamChannel
+      .receiveBroadcastStream({'prompt': prompt})
+      .map((dynamic event) => event as String);
+  }
+}
+
+Usage in Dart:
+
+final llama = LlamaFlutter();
+llama.getTokenStream("Hello").listen((token) {
+  print("Received token: $token");
+});
+
+5. Resource cleanup – ensure the model is closed when no longer needed:
+
+class LlamaPlugin: FlutterPlugin, EventChannel.StreamHandler {
+  private var contextPtr: Long = 0
+
+  // ... onAttached, onListen as above ...
+
+  fun freeModel() {
+    if (contextPtr != 0L) {
+      llama_free(contextPtr)  // JNI call to free model
+      contextPtr = 0L
+    }
+  }
+
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel.setMethodCallHandler(null)
+    eventChannel.setStreamHandler(null)
+    tokenJob?.cancel()
+    freeModel()
+  }
+}
+
+This ensures the native model context is freed and channels are cleared to avoid leaks.
+Section 15: Common Pitfalls
+
+    Incorrect pubspec platforms: Forgetting to list Android under flutter.plugin.platforms or leaving default iOS entries can break Android build. Use the correct syntax as above
+    docs.flutter.dev
+    .
+
+    Not using embedding V2: Older tutorials show the old (pre-1.12) plugin API. Make sure to use FlutterPlugin and onAttachedToEngine (V2 embedding) as V1 is unsupported
+    docs.flutter.dev
+    .
+
+    Channel threading issues: Blocking the main thread in onMethodCall or onListen will freeze Flutter UI. Always offload heavy tasks to background (coroutines/threads).
+
+    StreamHandler leaks: If you ignore onCancel, the EventSink may hold resources. Always set the sink to null or cancel jobs when onCancel/onDetached is called.
+
+    Memory leaks: Not freeing the llama context (llama_free) leads to memory not returned. Also, caching large byte buffers in Dart can cause OOM.
+
+    Permission errors: Attempting to access external storage without correct permissions (especially on Android 11+) will fail silently. Use the app’s own directories or SAF. Do not forget to update the manifest uses-permission if you do need them, and add permission request code.
+
+    ABI mismatches: Building only arm64-v8a may crash on other devices. In android.defaultConfig.abiFilters, include all needed ABIs (e.g. arm64-v8a, armeabi-v7a). Remember 64-bit is required, but you may include 32-bit for compatibility.
+
+    Null safety: Ensure generated Dart code is null-safe (Flutter now requires null safety). Pigeon and Flutter tools generate null-safe code by default.
+
+    Build variant differences: Debug vs release builds may behave differently (e.g., different lib paths). Test both. In Release, proguard/stripping might remove native symbols; disable stripping (-keep class * { *; }) for the plugin or use FFI’s visibility("default") attributes if necessary
+    docs.flutter.dev
+    .
+
+    Performance bottlenecks: Passing large data back to Dart can be slow. If streaming tokens individually is too slow, consider batching multiple tokens per message.
+
+Section 16: Documentation Links
+
+    Flutter plugin development: docs.flutter.dev/developing-packages/plugins
+
+    Flutter platform channels & Pigeon: docs.flutter.dev/platform-integration/platform-channels (see “Call platform-specific code” and Pigeon section)
+    docs.flutter.dev
+
+    Android NDK/CMake docs: developer.android.com/ndk/guides and developer.android.com/studio/projects/add-native-code (CMake integration)
+    developer.android.com
+
+    Android WorkManager: developer.android.com/topic/libraries/architecture/workmanager (for background tasks)
+    medium.com
+
+    Pigeon package: pub.dev/packages/pigeon (official docs and changelog)
+    pub.dev
+
+    Android 11 Storage: developer.android.com/about/versions/11/privacy/storage (scoped storage rules)
+    developer.android.com
+
+    Android 16KB pages: medium.com/@dfs.techblog/androids-16-kb-page-size-what-it-means (guide on Android 15 page size)
+    medium.com
+
+Final Recommendation Summary
+
+For a Flutter plugin wrapping llama.cpp on Android in 2025, we recommend: Use Dart FFI for the heavy inference logic (llama.cpp calls), and stream tokens to Dart via an EventChannel or Pigeon-generated Event API. The tech stack is: Flutter (latest stable, null-safe), Android embedding V2, Kotlin (1.8+), AGP 8.x, NDK r29, CMake ≥3.18, and llama.cpp built as a static lib or source in the plugin. Expected complexity is high – integrating native ML, threading, and Flutter streams is non-trivial. Key issues to watch: Android memory limits (don’t load GB models on the heap), Android 15 page size compatibility
+medium.com
+, and background execution (use ForegroundService or WorkManager with caution)
+medium.com
+. With careful design (FFI + EventChannel, and diligent memory management
+developer.android.com
+developer.android.com
+), you can achieve responsive text generation streaming while meeting Play Store requirements.
+
+
+ChatGPT can make mistakes. Check important info.
+Section 1: Recommended Architecture
+
+For an Android‐only Flutter plugin, use the Flutter plugin template with Android platform only (e.g. flutter create --template=plugin --platforms=android llama_flutter_android). This yields a structure with lib/ (Dart API), android/ (native code), and example/ app
+reddit.com
+. In pubspec.yaml, specify only Android under the plugin.platforms map. For example:
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example.llamaplugin
+        pluginClass: LlamaPlugin
+
+This declares the Android package and plugin class and omits iOS entirely
+docs.flutter.dev
+. Use the new Android embedding API (V2): implement the FlutterPlugin interface in your Kotlin class, and register your method/event channels in onAttachedToEngine. The legacy embedding (V1) is deprecated. For instance, a Kotlin plugin class typically looks like:
+
+class LlamaPlugin: FlutterPlugin, MethodCallHandler {
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel = MethodChannel(binding.binaryMessenger, "llama")
+    channel.setMethodCallHandler(this)
+  }
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel.setMethodCallHandler(null)
+  }
+  // ... 
+}
+
+(The above uses the V2 API with FlutterPlugin
+docs.flutter.dev
+.) In summary, use a single‐platform plugin: one Dart interface, one android/src/main/ folder (with Kotlin/Java code and C++ in cpp/ if needed), and no iOS/web folders. Keep the example app for Android testing.
+Section 2: Native Communication (MethodChannel vs Pigeon vs FFI)
+Method	Description	Performance	Use Case
+MethodChannel	Dart ↔ Android via asynchronous platform messages. Define a MethodChannel("name") on both sides and send invokeMethod calls.	Moderate overhead – messages are serialized and parsed, asynchronous by default
+reddit.com
+.	Good for simple calls or configuration. Avoid sending high-frequency data (tokens) one by one. Easy to implement without code generation.
+Pigeon (code-gen)	Generates type-safe Dart/Kotlin bindings for platform calls. You define a Dart API and Pigeon creates the boilerplate channels and data classes.	Similar overhead to MethodChannel (since it still uses message codecs), but less boilerplate. Serialization is efficient binary codec.	Best when you want strong typing and less manual coding. Use Pigeon to auto-generate host Dart and Kotlin code. Great for structured APIs.
+dart:ffi (C FFI)	Directly call native (C/C++) functions from Dart. Bypasses platform channels by loading a shared library (.so).	Lowest overhead per call – direct FFI calls (~100ns)
+reddit.com
+. Can be synchronous. JNI overhead eliminated.	Best for heavy computations (ML inference, high-throughput loops). Use when you have a C/C++ library (like llama.cpp) and need maximal speed. More complex setup (CMake, ABIs).
+
+MethodChannel (Option A) – This is the classic plugin bridge. Use a unique channel name, handle calls in onMethodCall, and return via the Result callback
+reddit.com
+reddit.com
+. Best practices (2025): always run heavy work on a background thread (e.g. Kotlin CoroutineScope(Dispatchers.Default)) and switch back to main thread for result.success. MethodChannel calls involve encoding/decoding, so high-frequency calls (like per-token streaming) will incur latency
+reddit.com
+medium.flutterdevs.com
+. Use it for discrete method calls (e.g. loading model, one-off generate) but not for thousands of rapid updates. Example structure:
+
+class LlamaPlugin: FlutterPlugin, MethodCallHandler {
+  private lateinit var channel : MethodChannel
+  override fun onAttachedToEngine(b: FlutterPlugin.FlutterPluginBinding) {
+    channel = MethodChannel(b.binaryMessenger, "llama")
+    channel.setMethodCallHandler(this)
+  }
+  override fun onMethodCall(call: MethodCall, result: Result) {
+    when (call.method) {
+      "initModel" -> { /* init llama model */ result.success(null) }
+      "generateToken" -> { /* compute next token */ result.success(token) }
+      else -> result.notImplemented()
+    }
+  }
+}
+
+Pigeon (Option B) – Pigeon 26.0.1 (Dec 2024)
+pub.dev
+is the latest. It auto-generates Dart/Kotlin code from annotated Dart definitions. Setup: add dev_dependencies: pigeon: ^26.0.1 in pubspec, write a Dart API file and run dart run pigeon --input pigeons/api.dart --dart_out lib/api.dart --kotlin_out android/src/main/kotlin/com/example/MessageApi.kt --kotlin_options package=com.example.llamaplugin (paths as appropriate). Pigeon can generate host APIs and EventChannel APIs. Advantages: type-safe, compile-time checks, no magic strings, and fewer bugs. It’s still using platform channels under the hood, so performance is similar to manual channels
+medium.com
+. Example Pigeon definition:
+
+import 'package:pigeon/pigeon.dart';
+
+class GenRequest { String prompt; int maxTokens; }
+class GenResponse { String token; bool done; }
+
+@HostApi()
+abstract class LlamaApi {
+  void initModel(String modelPath, double temperature);
+  GenResponse nextToken(GenRequest req);
+}
+
+After running pigeon, implement the generated interface in Kotlin. Pigeon also supports streaming via @EventChannelApi(), generating a Stream in Dart. For example:
+
+@EventChannelApi()
+abstract class TokenStreamApi {
+  @async  // indicates streams/events
+  @EventChannel(hostClass: "TokenStreamApiImpl")
+  TokenEvent startStream(GenRequest req);
+}
+
+Ffi (Option C) – Dart FFI (dart:ffi) lets Dart directly call compiled C/C++ functions. Android fully supports FFI (only dynamic libs). With Flutter, use flutter create --template=plugin_ffi to scaffold (see docs)
+docs.flutter.dev
+. You compile llama.cpp into a .so and load it (e.g. final dylib = DynamicLibrary.open("libllama.so")). FFI bypasses the JSON-method-channel layer; calls are direct and can be synchronous
+reddit.com
+. For example, you can typedef llama_init = Void Function(Pointer<Utf8>); and final llamaInit = lib.lookupFunction<llama_init, void Function(Pointer<Utf8>)>("llama_init_from_file").
+
+Recommendation: For a token-streaming text generation plugin, combine FFI with an EventChannel. Use FFI to load and run llama.cpp (max performance) and use a Dart Stream (via EventChannel or Pigeon event) to receive tokens as they are generated. This leverages FFI’s speed for inference and EventChannel’s bidirectional streaming. In practice, you might spawn a background coroutine in Kotlin to call the native inference loop (via FFI/JNI) and push each token through an EventChannel. This hybrid approach gives low latency with robust streaming.
+Section 3: Android Native Development Stack
+
+    Minimum SDK: To ensure 64-bit support (required by Play Store) and enable newer NDK/NNAPI features, use at least Android 5.0 (API 21) as minSdk. For AI/ML you might choose API 26+ to leverage NNAPI and improved memory handling, but API 21 is the lowest that satisfies 64-bit rules. New apps should target recent APIs (Android 15/API 35 by late 2025).
+
+    Kotlin version: Flutter recommends Kotlin 1.5.31 or newer (due to Gradle plugin requirements)
+    docs.flutter.dev
+    . In practice, use the latest stable (e.g. Kotlin 1.8.x or 1.9.x) compatible with your Android Gradle Plugin.
+
+    Android Gradle Plugin (AGP): Use a recent AGP (8.x). As of 2024, AGP 8.13.0 is available
+    developer.android.com
+    . AGP 8.4+ supports Android 14+ SDKs. Note AGP version ties to Gradle version (e.g. AGP 8.13 requires Gradle 8.13
+    developer.android.com
+    ).
+
+    NDK version: Use the latest stable Android NDK r29 (or LTS r27). NDK r29 (29.0.x) is current stable
+    developer.android.com
+    . In android/build.gradle, specify e.g. ndkVersion "29.0.14206865" to ensure consistency. NDK r28+ supports 16KB pages by default (see below)
+    medium.com
+    .
+
+    CMake version: The NDK toolchain now requires at least CMake 3.10
+    github.com
+    . Use a modern CMake (>=3.10, e.g. 3.22 bundled with recent NDKs). In android/build.gradle you can let Gradle manage CMake; ensure your cmake block has version "3.18" or higher if needed. Recent NDKs bundle CMake 3.22+.
+
+Section 4: CMake and C++ Build System
+
+Follow Android NDK CMake best practices: use the NDK’s toolchain file (android.toolchain.cmake) which Gradle’s externalNativeBuild does by default
+developer.android.com
+. In your plugin’s android/CMakeLists.txt, specify:
+
+cmake_minimum_required(VERSION 3.18)
+project(llama_plugin LANGUAGES CXX)
+
+add_library(llama_plugin SHARED
+    src/main/cpp/llama_plugin.cpp
+    src/main/cpp/llama.cpp      # include llama.cpp source or link to library
+)
+
+target_include_directories(llama_plugin PRIVATE
+    src/main/cpp/include   # if llama headers are here
+)
+
+# Set C++ standard (NDK default is C++14)
+target_compile_features(llama_plugin PRIVATE cxx_std_17)  # or set CXX_STANDARD 17
+
+# Define compiler flags for performance
+target_compile_options(llama_plugin PRIVATE 
+    -O3 -funroll-loops -march=armv8-a -mtune=generic
+    -DGGML_CPU_AARCH64   # enable ARMv8 intrinsics
+    -DGGML_SVE           # enable ARM SVE (on ARMv9+)
+)
+
+find_library(log-lib log)
+target_link_libraries(llama_plugin PRIVATE ${log-lib})
+
+Linking llama.cpp: You can compile llama.cpp directly into your plugin (as above), or build it as a static library and use target_link_libraries(llama_plugin llama-lib). Just ensure to include required system libs (e.g. -landroid -ldl -lm if needed). Use target_link_libraries to link against log and any other Android system libs.
+
+Handle ARM64 optimizations: enable NEON/SVE (as above) and high optimization. llama.cpp’s recommended flags include -DGGML_CPU_AARCH64 (Armv8 support) and -DGGML_SVE for newer ARMv9 cores
+blog.steelph0enix.dev
+. Also consider enabling -ffast-math cautiously if acceptable.
+
+For C++17/20: NDK r18+ supports C++17. As CMake defaults to C++14, explicitly request C++17: e.g. set(CMAKE_CXX_STANDARD 17) or use target_compile_features(llama_plugin PRIVATE cxx_std_17)
+developer.android.com
+. C++20 support is limited; it’s safest to stick with C++17 for now. Use libc++ (NDK default) for the C++ runtime.
+Section 5: Streaming Data from Native to Dart
+
+EventChannel (Option A): The Flutter EventChannel is built for continuous streams
+medium.flutterdevs.com
+. On Android, set up EventChannel(messenger, "llama/token_stream") and implement StreamHandler. In onListen, start your token generation (e.g. a coroutine) and push events via events.success(token). In Dart, use EventChannel('llama/token_stream').receiveBroadcastStream().listen(...). Example pattern:
+
+// In Kotlin plugin
+class LlamaPlugin: FlutterPlugin, EventChannel.StreamHandler {
+  private lateinit var eventChannel: EventChannel
+  private var tokenJob: Job? = null
+
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    eventChannel = EventChannel(binding.binaryMessenger, "llama/token_stream")
+    eventChannel.setStreamHandler(this)
+  }
+
+  override fun onListen(args: Any?, events: EventChannel.EventSink?) {
+    val prompt = (args as? Map<*,*>)?.get("prompt") as? String ?: ""
+    tokenJob = CoroutineScope(Dispatchers.Default).launch {
+      for (token in runInference(prompt)) {
+        withContext(Dispatchers.Main) { events?.success(token) }
+      }
+      events?.endOfStream()
+    }
+  }
+  override fun onCancel(args: Any?) {
+    tokenJob?.cancel()
+  }
+}
+
+This streams each token via the EventChannel. Performance: EventChannels incur overhead per event (similar to MethodChannel)
+medium.flutterdevs.com
+. For very rapid streams, consider batching or binary codecs if needed. Ensure to call events.endOfStream() when done to close the stream. Memory: Avoid retaining the EventSink beyond its lifetime (clear it on onCancel) to prevent leaks.
+
+StreamHandler (Option B): In Android’s plugin API, EventChannel.setStreamHandler(...) uses an interface called StreamHandler. There is no separate “StreamHandler” mechanism beyond this. Essentially, implementing EventChannel.StreamHandler as above is how streaming is done on Android.
+
+Platform-specific streams (Option C): You can use Kotlin Flow/Coroutines as the token source and bridge it to Dart. For example, launch a coroutine that emits tokens into an EventSink. Kotlin’s Flow itself isn’t directly exposed to Dart, but you could collect the flow and send each element via the EventChannel. This is more about implementation (benefits from coroutines’ cancellation and backpressure) rather than a different Flutter API.
+
+Recommendation: For real-time token streaming in 2025, use an EventChannel (or Pigeon @EventChannel) to send tokens asynchronously, backed by native code. Compute tokens on a background coroutine (using FFI/jni). This combo (native→Dart stream) is the standard pattern. The generated Dart code can consume the stream as a Stream<String> for tokens.
+Section 6: Background Processing
+
+For long-running inference that should survive app backgrounding:
+
+    Foreground Service: Use a Foreground Service when you need continuous execution with user awareness. This involves creating a Service with startForeground(notificationId, notification) so Android won’t kill it easily
+    medium.com
+    . You must show a persistent notification. This is ideal for very long or indefinite inference.
+
+    WorkManager: Use WorkManager for deferrable or periodic work. WorkManager’s WorkRequest (especially CoroutineWorker) can perform background tasks on a background thread, and if you need it to continue even under battery optimizations you can call setForegroundAsync()
+    medium.com
+    . However, WorkManager jobs are not truly real-time; they may be delayed by the OS. For streaming inference, WorkManager is less suitable unless you break the inference into chunks.
+
+    Coroutines with Flutter: In your plugin, perform inference on a Dispatchers.IO/Default coroutine
+    stackoverflow.com
+    . For any Flutter-facing callback (MethodChannel/EventChannel), switch to Dispatchers.Main. For example, use scope.launch(Dispatchers.IO) { val result = runInference(); withContext(Dispatchers.Main) { channel.success(result) } }. Importantly, always call invokeMethod or event.success on the main thread
+    stackoverflow.com
+    .
+
+    Preventing Kill: To prevent the system from stopping your task, use a ForegroundService (as above). You can also acquire a partial WakeLock (CPU) while computing. In a simpler case, run the work on a background thread while the app is in foreground. If you use WorkManager, it will handle scheduling but may still be paused in Doze mode unless you use setRequiresBatteryNotLow(false) etc.
+
+    Example (Foreground Service): In Kotlin, create a Service and call startForeground(1, notification). Perform inference in a coroutine within the Service. This keeps your process alive even if the UI is gone.
+
+Section 7: Memory Management
+
+Android app heap is limited (varies by device)
+developer.android.com
+. Exceeding it triggers OOM. Typical heap might be a few hundred MB on phones; avoid loading multi-GB models into the Java heap. Strategies:
+
+    Memory-mapped files: Load the llama model via memory-mapping (mmap) so it stays off-heap. Llama.cpp supports streaming from disk to avoid full load. On Android, you can use native mmap or a ByteBuffer. This way large model data doesn’t count against the Java heap.
+
+    Check available memory: Use ActivityManager.getMemoryInfo() to monitor memory
+    developer.android.com
+    . In a plugin, call ActivityManager via platform channel or use NDK’s android_meminfo.
+
+    onTrimMemory: Implement ComponentCallbacks2.onTrimMemory() in your Android code to free caches or reduce memory usage under pressure
+    developer.android.com
+    .
+
+    Release resources: When done, free the llama context (call llama_free or equivalent) to release its memory. Also null out any large buffers.
+
+    Large model strategy: Do not package 4–8GB models in the APK. Store them in external storage or download them at runtime. Use app-specific storage (getExternalFilesDir) so you don’t need storage permission. Use streaming inference so only parts of the model are in memory at a time. Always guard against OutOfMemory by catching and cleaning up if needed.
+
+Example safe load (pseudo-code):
+
+val memInfo = ActivityManager.MemoryInfo()
+( context.getSystemService(ACTIVITY_SERVICE) as ActivityManager )
+    .getMemoryInfo(memInfo)
+val available = memInfo.availMem
+if (modelFile.length() < available) {
+    loadModel(modelFile)
+} else {
+    throw RuntimeException("Not enough memory for model")
+}
+
+Section 8: llama.cpp Integration
+
+The llama.cpp C API provides functions to load models and generate text. Typical usage (C/C++ side) is:
+
+    llama_context * ctx = llama_init_from_file(modelPath, params); – load model with given context parameters.
+
+    llama_eval(ctx, input_tokens, n_tok, past_length, n_threads); – evaluate a batch of tokens.
+
+    Sampling functions like llama_sample_top_p, llama_sample_top_k, etc., to choose next tokens from ctx->logits.
+
+    llama_tokenize to convert strings to tokens and llama_token_to_str to get text output.
+
+    When done, llama_free(ctx);.
+
+On Android, you’ll wrap these in JNI or FFI. E.g., an extern "C" JNI function might call llama_init_from_file and return a pointer as a jlong. Then another JNI call can perform llama_eval and return the next token.
+
+Build flags: For ARM64 (aarch64), compile with optimizations and enable llama-specific flags. Use -DGGML_CPU_AARCH64=1 to enable Armv8 instructions, and -DGGML_SVE=1 if targeting newer ARMv9 chips
+blog.steelph0enix.dev
+. Also compile with -O3 -funroll-loops. Include -march=armv8-a or let NDK’s default target. If NDK < r28, add -Wl,-z,max-page-size=16384 when linking to support 16KB pages (Android 15)
+medium.com
+.
+
+Known issues: Llama.cpp on Android may hit alignment or page-size bugs on older NDKs. Use NDK r28+ to avoid page-size problems
+medium.com
+. Ensure no hardcoded PAGE_SIZE=4096 in any code. Also check integer width on Android (llama uses size_t). There is community experience showing llama.cpp runs on ARM64 if built properly; follow any recent Android-specific build guides (e.g. on GitHub) if available.
+
+JNI wrapper example (pattern):
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_example_llamaplugin_Llama_nativeInit(JNIEnv* env, jclass cls, jstring path) {
+    const char* model_path = env->GetStringUTFChars(path, 0);
+    llama_context* ctx = llama_init_from_file(model_path, /*params*/);
+    env->ReleaseStringUTFChars(path, model_path);
+    return reinterpret_cast<jlong>(ctx);
+}
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_example_llamaplugin_Llama_nativeGenerate(JNIEnv* env, jclass, jlong ctxPtr) {
+    llama_context* ctx = reinterpret_cast<llama_context*>(ctxPtr);
+    int token = llama_sample_next(ctx); // hypothetical
+    const char* str = llama_token_to_str(ctx, token);
+    return env->NewStringUTF(str);
+}
+
+Remember to manage ctxPtr lifecycle (free it later with another JNI call).
+Section 9: Permissions and Security
+
+    Android 15 (API 35) and 16KB pages: Android 15 supports 16 KB page sizes. By Nov 1, 2025, Play Store requires apps targeting API 35+ to support 16KB pages
+    medium.com
+    . NDK r28+ already aligns to 16KB by default. If using older NDKs, add linker flag -Wl,-z,max-page-size=16384
+    medium.com
+    . Ensure no code assumes 4096-byte pages: replace any #define PAGE_SIZE 4096 with a runtime query (e.g. sysconf(_SC_PAGESIZE))
+    medium.com
+    .
+
+    Storage for models: Use app-specific storage or the Storage Access Framework (SAF). For large model files, place them in context.getExternalFilesDir() or prompt the user to pick a location via SAF. This avoids needing READ_EXTERNAL_STORAGE. If your plugin targets Android 11+, scoped storage means your app’s own directories are accessible without permission
+    developer.android.com
+    . If you must read arbitrary external paths, you’ll need MANAGE_EXTERNAL_STORAGE (All files access), which has Play Store restrictions, so avoid it unless truly necessary.
+
+    Scoped Storage: On Android 11+, use getExternalFilesDirs() for external directories
+    developer.android.com
+    . Don’t rely on WRITE_EXTERNAL_STORAGE. For example, save downloaded models to getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).
+
+    Security best practices: Keep native libraries non-exported (set <application android:extractNativeLibs="false"> in AndroidManifest.xml to avoid unpacking). Load models securely (validate any user-supplied model path). Minimize permissions: the plugin itself likely only needs INTERNET (if downloading models) and storage (if outside app storage). Use Flutter’s flutter_secure_storage or Android KeyStore if encryption needed. Finally, ensure all native code is built with appropriate -fvisibility=hidden or use __attribute__((used)) for symbols to prevent strip (see Flutter’s FFI docs)
+    docs.flutter.dev
+    .
+
+Section 10: Testing and Debugging
+
+    C++ Debugging: In Android Studio, enable native debugging. In your Run Configuration for the app, tick “Debug” and open the C++ code in the IDE. Set breakpoints in your .cpp files. When running in debug mode, Android Studio attaches LLDB. Alternatively, use flutter run --debug and in Android Studio use Attach Debugger to the running process. Ensure your native library is compiled with debug symbols (Gradle debug build by default does this).
+
+    Android Studio setup: Open the android folder as an Android project. In the Android Studio “Run/Debug Configurations” panel, under your Flutter app, check “Enable native debugging” or similar. After launching, you can step through both Dart (in Dart layer) and Kotlin/Java/C++.
+
+    Logging: Use Log.i/w/e(TAG, ...) in Kotlin or __android_log_print in C++ to print logs to Logcat. In Dart, listen via debugPrint() or view the console. Tag messages clearly (e.g. “LlamaPlugin”). You can also send logs across channels for in-app display, but Logcat is simplest.
+
+    Testing structure: Follow Flutter’s plugin testing guidelines
+    docs.flutter.dev
+    . For Dart code, write unit tests in test/. For integration, use the plugin’s example/integration_test/. For Android native code, write JUnit tests under android/src/test/. (The template even includes a sample android/src/test/ExampleUnitTest.java.) In these tests you can call your plugin’s methods directly on the JVM.
+
+    Resource cleanup: In onDetachedFromEngine, clean up everything. For example:
+
+override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+  channel.setMethodCallHandler(null)
+  eventChannel.setStreamHandler(null)
+  // If using JNI/FFI, free the native model
+  nativeFreeModel()
+}
+
+This avoids leaks (note the pattern in [10†L320-L327]). Also null out any static references. If using Flow or Streams, cancel them.
+Section 11: Performance Optimization
+
+    ARM64 SIMD: Use NEON and SVE optimizations. Compile with -DGGML_CPU_AARCH64 (enables NEON) and, if targeting the newest chips (Armv9), -DGGML_SVE
+    blog.steelph0enix.dev
+    . Enable -O3, and consider -ffast-math for math (with caution). NDK’s compiler defaults to -march=armv8-a for arm64.
+
+    Threading: Utilize multiple cores. llama.cpp supports multi-threading (n_threads parameter). Spawn Kotlin coroutines or threads to call llama_eval in parallel if possible. On Android 11+, binding CPU cores may improve sustained throughput.
+
+    Battery/Thermal: Model inference is CPU/GPU intensive. For mobile, monitor battery (maybe reduce clock rate by setting setRenderThreadCpuAffinityMask or scale down threads if overheated). Avoid running at full performance continuously; consider adding delays or processing small batches to let the device cool.
+
+    Profiling: Use Android Profiler to check CPU & memory during inference. Identify hot spots (maybe data copying) and optimize (e.g. reuse buffers, avoid GC during streaming).
+
+    Gotchas: Avoid converting data too often between Dart and native. For instance, sending each token as a Dart string across channels incurs GC and UTF-8 conversion. It may be more efficient to batch tokens or use byte arrays if needed. Also watch out for JNI local reference limits if looping in JNI (use ReleaseStringUTFChars promptly).
+
+Section 12: Package Structure Best Practices
+
+A recommended plugin folder structure:
+
+llama_flutter_android/
+├── android/
+│   ├── build.gradle
+│   ├── CMakeLists.txt
+│   └── src/main/
+│       ├── kotlin/        # Kotlin plugin code (MyPlugin.kt)
+│       └── cpp/           # Native C++ code (llama.cpp, wrapper.cpp)
+├── lib/
+│   └── llama_flutter_android.dart  # Dart API
+└── pubspec.yaml
+
+    android/: Contains all Android-side code. build.gradle defines Android configs (compileSdk, ndkVersion, dependencies). CMakeLists.txt lives here for building native code. Under src/main/kotlin/… put your plugin class and any JNI wrapper classes. Under src/main/cpp/… place llama.cpp source and any JNI glue code.
+
+    lib/: Exposes a Dart class or functions that call into the platform (e.g. via MethodChannel.invokeMethod). This is the public API for Flutter apps. Keep this thin and null-safe.
+
+    pubspec.yaml: Declares name, version, and the plugin details. Under flutter: use plugin.platforms.android to point to your package/class
+    docs.flutter.dev
+    . Include necessary dependencies (e.g. ffi).
+
+    example/ (not shown above): A sample Flutter app demonstrating use of the plugin. It should only include Android since it’s Android-only.
+
+    README.md: Document usage, setup steps, and any permissions required.
+
+Section 13: Dependencies to Research
+
+    Pub.dev packages:
+
+        pigeon: The latest version is 26.0.1 (as of late 2024)
+        pub.dev
+        . Changelog highlights stable data classes and event support.
+
+        ffi: Latest version 2.1.4 (Nov 2023)
+        pub.dev
+        .
+
+        path_provider: Latest version 2.1.5 (Dec 2023)
+        pub.dev
+        ; use this to locate storage directories for model files.
+
+        Others: Consider android_intent_plus if launching platform activities, or permission_handler only if needing dangerous permissions (but we try to avoid them). For long tasks, workmanager exists for Flutter but on Android native side you'd normally use the platform APIs.
+
+    Android libraries:
+
+        Kotlin stdlib: Use whatever matches your Kotlin plugin (e.g. 1.8.20 or above). In Gradle, ext.kotlin_version = "1.8.20".
+
+        Kotlin Coroutines: A recent stable version, e.g. org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.x or 1.7.x. If using Android-specific, kotlinx-coroutines-android.
+
+        AndroidX components: Your android/build.gradle should use AndroidX libraries (no legacy support lib). For example, implementation "androidx.annotation:annotation:1.6.0" if needed. Also include implementation "androidx.core:core-ktx:1.9.0" etc. These come by default in Flutter’s Android template.
+
+        Others: If using Jetpack (e.g. for Lifecycle, WorkManager), add androidx.work:work-runtime-ktx:2.8.0 or newer
+        medium.com
+        . For a ForegroundService, ensure you have implementation "androidx.core:core-ktx", which includes NotificationCompat.
+
+Section 14: Example Code
+
+1. Pigeon definition (Dart) – define the host API for text generation:
+
+// api.dart
+import 'package:pigeon/pigeon.dart';
+
+class GenerationRequest { 
+  String? prompt; 
+  int? maxTokens; 
+}
+
+class GenerationResponse { 
+  String? token; 
+  bool done; 
+}
+
+@HostApi()
+abstract class LlamaApi {
+  void initModel(String? modelPath, double? temperature);
+  GenerationResponse generateToken(GenerationRequest req);
+}
+
+Run Pigeon to generate Dart and Kotlin code. The host Kotlin implementation would then handle initModel and generateToken.
+
+2. Kotlin implementation with streaming – using EventChannel for streaming tokens:
+
+// in android/src/main/kotlin/com/example/llamaplugin/LlamaPlugin.kt
+
+class LlamaPlugin: FlutterPlugin, EventChannel.StreamHandler {
+  private lateinit var eventChannel: EventChannel
+  private var tokenJob: Job? = null
+
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    eventChannel = EventChannel(binding.binaryMessenger, "llama/token_stream")
+    eventChannel.setStreamHandler(this)
+    // Also set up MethodChannel or Pigeon-generated API as needed
+  }
+
+  override fun onListen(args: Any?, events: EventChannel.EventSink?) {
+    val params = args as? Map<*, *> 
+    val prompt = params?.get("prompt") as? String ?: ""
+    // Launch a coroutine to generate tokens
+    tokenJob = CoroutineScope(Dispatchers.Default).launch {
+      for (token in runLlamaInference(prompt)) {  // assume this yields tokens
+        withContext(Dispatchers.Main) {
+          events?.success(token)  // send token to Dart
+        }
+      }
+      events?.endOfStream() // close stream when done
+    }
+  }
+
+  override fun onCancel(args: Any?) {
+    tokenJob?.cancel()  // stop streaming
+  }
+
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    eventChannel.setStreamHandler(null)
+    tokenJob?.cancel()
+  }
+}
+
+3. CMakeLists.txt – linking llama.cpp library:
+
+# android/CMakeLists.txt
+cmake_minimum_required(VERSION 3.18)
+project(llama_plugin LANGUAGES C CXX)
+
+add_library(llama_plugin SHARED
+    src/main/cpp/llama_plugin.cpp
+    src/main/cpp/llama.cpp      # add llama.cpp source (or link separately)
+)
+
+target_include_directories(llama_plugin PRIVATE
+    src/main/cpp/include
+)
+
+# Use C++17
+target_compile_features(llama_plugin PRIVATE cxx_std_17)
+
+# Optimization and flags
+target_compile_options(llama_plugin PRIVATE 
+    -O3 -funroll-loops 
+    -DGGML_CPU_AARCH64 -DGGML_SVE
+)
+
+find_library(log-lib log)
+target_link_libraries(llama_plugin PRIVATE ${log-lib})
+
+This builds a libllama_plugin.so that can be loaded by the plugin.
+
+4. EventChannel streaming example (Dart) – consuming the stream:
+
+// in lib/llama_flutter_android.dart
+
+import 'package:flutter/services.dart';
+
+class LlamaFlutter {
+  static const _streamChannel = EventChannel('llama/token_stream');
+
+  /// Returns a broadcast stream of tokens from native.
+  Stream<String> getTokenStream(String prompt) {
+    return _streamChannel
+      .receiveBroadcastStream({'prompt': prompt})
+      .map((dynamic event) => event as String);
+  }
+}
+
+Usage in Dart:
+
+final llama = LlamaFlutter();
+llama.getTokenStream("Hello").listen((token) {
+  print("Received token: $token");
+});
+
+5. Resource cleanup – ensure the model is closed when no longer needed:
+
+class LlamaPlugin: FlutterPlugin, EventChannel.StreamHandler {
+  private var contextPtr: Long = 0
+
+  // ... onAttached, onListen as above ...
+
+  fun freeModel() {
+    if (contextPtr != 0L) {
+      llama_free(contextPtr)  // JNI call to free model
+      contextPtr = 0L
+    }
+  }
+
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel.setMethodCallHandler(null)
+    eventChannel.setStreamHandler(null)
+    tokenJob?.cancel()
+    freeModel()
+  }
+}
+
+This ensures the native model context is freed and channels are cleared to avoid leaks.
+Section 15: Common Pitfalls
+
+    Incorrect pubspec platforms: Forgetting to list Android under flutter.plugin.platforms or leaving default iOS entries can break Android build. Use the correct syntax as above
+    docs.flutter.dev
+    .
+
+    Not using embedding V2: Older tutorials show the old (pre-1.12) plugin API. Make sure to use FlutterPlugin and onAttachedToEngine (V2 embedding) as V1 is unsupported
+    docs.flutter.dev
+    .
+
+    Channel threading issues: Blocking the main thread in onMethodCall or onListen will freeze Flutter UI. Always offload heavy tasks to background (coroutines/threads).
+
+    StreamHandler leaks: If you ignore onCancel, the EventSink may hold resources. Always set the sink to null or cancel jobs when onCancel/onDetached is called.
+
+    Memory leaks: Not freeing the llama context (llama_free) leads to memory not returned. Also, caching large byte buffers in Dart can cause OOM.
+
+    Permission errors: Attempting to access external storage without correct permissions (especially on Android 11+) will fail silently. Use the app’s own directories or SAF. Do not forget to update the manifest uses-permission if you do need them, and add permission request code.
+
+    ABI mismatches: Building only arm64-v8a may crash on other devices. In android.defaultConfig.abiFilters, include all needed ABIs (e.g. arm64-v8a, armeabi-v7a). Remember 64-bit is required, but you may include 32-bit for compatibility.
+
+    Null safety: Ensure generated Dart code is null-safe (Flutter now requires null safety). Pigeon and Flutter tools generate null-safe code by default.
+
+    Build variant differences: Debug vs release builds may behave differently (e.g., different lib paths). Test both. In Release, proguard/stripping might remove native symbols; disable stripping (-keep class * { *; }) for the plugin or use FFI’s visibility("default") attributes if necessary
+    docs.flutter.dev
+    .
+
+    Performance bottlenecks: Passing large data back to Dart can be slow. If streaming tokens individually is too slow, consider batching multiple tokens per message.
+
+Section 16: Documentation Links
+
+    Flutter plugin development: docs.flutter.dev/developing-packages/plugins
+
+    Flutter platform channels & Pigeon: docs.flutter.dev/platform-integration/platform-channels (see “Call platform-specific code” and Pigeon section)
+    docs.flutter.dev
+
+    Android NDK/CMake docs: developer.android.com/ndk/guides and developer.android.com/studio/projects/add-native-code (CMake integration)
+    developer.android.com
+
+    Android WorkManager: developer.android.com/topic/libraries/architecture/workmanager (for background tasks)
+    medium.com
+
+    Pigeon package: pub.dev/packages/pigeon (official docs and changelog)
+    pub.dev
+
+    Android 11 Storage: developer.android.com/about/versions/11/privacy/storage (scoped storage rules)
+    developer.android.com
+
+    Android 16KB pages: medium.com/@dfs.techblog/androids-16-kb-page-size-what-it-means (guide on Android 15 page size)
+    medium.com
+
+Final Recommendation Summary
+
+For a Flutter plugin wrapping llama.cpp on Android in 2025, we recommend: Use Dart FFI for the heavy inference logic (llama.cpp calls), and stream tokens to Dart via an EventChannel or Pigeon-generated Event API. The tech stack is: Flutter (latest stable, null-safe), Android embedding V2, Kotlin (1.8+), AGP 8.x, NDK r29, CMake ≥3.18, and llama.cpp built as a static lib or source in the plugin. Expected complexity is high – integrating native ML, threading, and Flutter streams is non-trivial. Key issues to watch: Android memory limits (don’t load GB models on the heap), Android 15 page size compatibility
+medium.com
+, and background execution (use ForegroundService or WorkManager with caution)
+medium.com
+. With careful design (FFI + EventChannel, and diligent memory management
+developer.android.com
+developer.android.com
+), you can achieve responsive text generation streaming while meeting Play Store requirements.
+Citations
+

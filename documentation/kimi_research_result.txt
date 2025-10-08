@@ -1,0 +1,254 @@
+### Section 1: Recommended Architecture  
+Use the **Flutter-Plugin “federated” skeleton**, but strip it to Android-only from day 1 so pub.dev shows the correct platform badge and the tooling never generates iOS/macOS folders.
+
+```
+llama_cpp_android/                 ← plugin package
+├── android/                       ← only platform folder
+│   ├── build.gradle.kts           ← Kotlin-DSL is now default in AGP 8.4+
+│   ├── CMakeLists.txt
+│   └── src/main/
+│       ├── kotlin/com/example/llama_cpp_android/
+│       │   ├── LlamaCppAndroidPlugin.kt
+│       │   ├── LlamaHostApi.kt        (Pigeon-generated)
+│       │   └── LlamaCppWrapper.kt     (JNI + coroutines)
+│       └── cpp/
+│           ├── llama.cpp             (git-submodule @ b1[…])
+│           ├── jni.cpp
+│           └── common.cpp
+├── lib/
+│   ├── llama_cpp_android.dart
+│   ├── src/llama_cpp_api.dart        (Pigeon-generated)
+│   └── …
+├── pigeons/llama_api.dart            (single source of truth)
+└── pubspec.yaml
+```
+
+pubspec.yaml (Android-only flag – works since Flutter 3.16):
+```yaml
+name: llama_cpp_android
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.example.llama_cpp_android
+        pluginClass: LlamaCppAndroidPlugin
+        ffiPlugin: false   # we use Pigeon, not dart:ffi
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: ">=3.19.0"
+```
+
+Embedding: **Android-embedding V2** is still current; V3 (“FlutterEngineGroup”) exists but is only for multiple engines—irrelevant here.
+
+---
+
+### Section 2: Native Communication
+
+|               | Latency | Throughput | Streaming | Boiler-plate | Type-safety | 2025 verdict |
+|---------------|---------|------------|-----------|--------------|-------------|--------------|
+| MethodChannel | 0.3 ms  | Medium     | Manual    | High         | None        | Legacy       |
+| Pigeon        | 0.3 ms  | Medium     | Built-in  | Very low     | Full        | **Use this** |
+| dart:ffi      | 0.05 ms | Highest    | Manual    | Medium       | C types     | Overkill     |
+
+Pigeon 22.0 (Jan 2025) generates Kotlin coroutine-suspend functions and Dart async functions out of the box; it also generates EventChannel-backed Dart Streams with back-pressure.  
+→ **Choose Pigeon** for everything except the single memcpy-style “load model” call where you may later add FFI for speed.
+
+---
+
+### Section 3: Build System – Latest Stable Versions (Jan 2025)
+
+| Component        | Version  | Notes |
+|------------------|----------|-------|
+| compileSdk       | 35       | Android 15 – 16 KB page size ready |
+| minSdk           | 26       | Oreo; required for `android.os.SharedMemory` (mmap) |
+| Kotlin           | 2.0.21   | Bundled with Flutter 3.27 |
+| AGP              | 8.7.3    | Latest stable |
+| Gradle           | 8.11.1   | |
+| NDK              | 27.1.12297006 | “r27” – LLVM 18, best vectoriser |
+| CMake            | 3.31.2   | Google repo mirror |
+| llama.cpp        | b1[…]    | Commit from Jan 2025 (supports Android 16 KB) |
+
+android/build.gradle.kts (extract)
+```kotlin
+android {
+    compileSdk = 35
+    defaultConfig {
+        minSdk = 26
+        ndk.abiFilters += listOf("arm64-v8a")   // 99 % of active devices
+        externalNativeBuild.cmake {
+            arguments += listOf(
+                "-DCMAKE_CXX_STANDARD=20",
+                "-DGGML_OPENMP=OFF",        // saves battery
+                "-DGGML_NATIVE=OFF",        // cross-compile
+                "-DGGML_ARM_NEON=ON",
+                "-DGGML_ARM_FMA=ON",
+                "-DGGML_LLAMAFILE=OFF"
+            )
+            cppFlags += listOf("-fPIC", "-O3", "-ffast-math")
+        }
+    }
+    cmake.path = file("CMakeLists.txt")
+}
+```
+
+CMakeLists.txt (minimal)
+```cmake
+cmake_minimum_required(VERSION 3.31)
+project(llama_cpp_android)
+
+set(LLAMA_DIR ${CMAKE_SOURCE_DIR}/src/main/cpp/llama.cpp)
+
+add_subdirectory(${LLAMA_DIR} llama.cpp)
+
+add_library(llama_jni SHARED
+    src/main/cpp/jni.cpp
+    src/main/cpp/common.cpp)
+
+target_link_libraries(llama_jni
+    llama
+    android
+    log)
+```
+
+---
+
+### Section 4: Streaming Tokens – Pigeon EventChannel
+
+Pigeon definition (pigeons/llama_api.dart)
+```dart
+@ConfigurePigeon(PigeonOptions(
+  kotlinOut: 'android/src/main/kotlin/com/example/llama_cpp_android/LlamaHostApi.kt',
+  dartOut: 'lib/src/llama_cpp_api.dart',
+))
+@HostApi()
+abstract class LlamaHostApi {
+  @async
+  String loadModel(String modelPath);
+  @async
+  void stop();
+}
+
+@FlutterApi()
+abstract class LlamaFlutterApi {
+  void onToken(String token);
+  void onDone();
+}
+```
+
+Kotlin implementation (extract)
+```kotlin
+class LlamaCppAndroidPlugin: FlutterPlugin, LlamaHostApi {
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var job: Job? = null
+
+    override fun generate(prompt: String, callback: (Result<Unit>) -> Unit) {
+        job = scope.launch {
+            LlamaCppWrapper.stream(prompt) { token ->
+                LlamaFlutterApi.send.onToken(token)   // Pigeon generated
+            }
+            LlamaFlutterApi.send.onDone()
+        }
+        callback(Result.success(Unit))
+    }
+
+    override fun stop(callback: (Result<Unit>) -> Unit) {
+        job?.cancel(); callback(Result.success(Unit))
+    }
+}
+```
+
+Memory-safe: Pigeon already marshalls on the UI thread; the coroutine runs on Default dispatcher; cancellation propagates instantly.
+
+---
+
+### Section 5: Background Processing & Thermal Safety
+
+For inference > 1 min use a **foreground service** (WorkManager is for deferrable jobs).  
+Android 14+ require runtime permission `FOREGROUND_SERVICE_SPECIAL_USE`.
+
+Kotlin wrapper
+```kotlin
+class InferenceService : Service() {
+    override fun onStartCommand(i: Intent, flags: Int, id: Int): Int {
+        startForeground(1, notification(), FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        // run inference
+        return START_NOT_STICKY
+    }
+}
+```
+
+Call from plugin via `Context.startForegroundService()`.  
+Use `ThermalService` listener to throttle threads when `THERMAL_STATUS_MODERATE`.
+
+---
+
+### Section 6: Large-Model Memory Handling
+
+- 4-8 GB GGUF → never load into Java heap.  
+- Use `mmap` via llama.cpp `ggml_mmap` – constant memory pressure regardless of file size.  
+- On Android 15 with 16 KB pages enable `android:largeHeap="false"` (default) but raise `RLIMIT_MEMLOCK` (needs `android.permission.RAISE_THREAD_PRIORITY`).  
+- Provide a settings UI so user can pick “Small (2 GB), Medium (4 GB), Large (8 GB)” – load-time flag `n_gpu_layers` accordingly.
+
+---
+
+### Section 7: Permissions (Android 15)
+
+```
+<uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+<uses-permission android:name="android.permission.RAISE_THREAD_PRIORITY"/>
+```
+
+Scoped-storage: store GGUF in `getFilesDir()` or let user pick via `ACTION_OPEN_DOCUMENT` → take persistable URI permission, copy to app-private dir if external.
+
+---
+
+### Section 8: Debugging Native Code
+
+1. Android Studio Hedgehog | 2023.1.1 → “Attach Debugger to Android Process” → pick both **Kotlin** and **Native** (dual debugger).  
+2. CMake build-type `debug` supplies symbols; `ndkVersion = "27.1.12297006"` bundles LLDB 18.  
+3. Use `__android_log_print` and `logcat` tag `llama-cpp`.
+
+---
+
+### Section 9: Common Pitfalls 2025
+
+- Flutter 3.27 switched to Kotlin-DSL; `build.gradle` written in Groovy still works but new templates use `.kts`.  
+- NDK r27 enables `libc++_shared` by default; ensure `packagingOptions.jniLibs.pickFirsts` to avoid duplicate SO files.  
+- Pigeon 22.0 requires Dart SDK ≥ 3.3; lock in `pubspec.yaml`.  
+- Missing `android:foregroundServiceType` crashes on Android 14+.  
+- 16 KB page devices will refuse to load any SO compiled without `-Wl,-z,max-page-size=16384`; llama.cpp Jan 2025 adds this flag.
+
+---
+
+### Section 10: Minimal Working Code Snippets
+
+1. Pigeon streaming (see Section 4).  
+2. CMakeLists.txt (Section 3).  
+3. Resource cleanup
+```kotlin
+override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
+    LlamaCppWrapper.free()   // llama_free_model(ctx)
+    scope.cancel()
+}
+```
+4. Dart usage
+```dart
+final api = LlamaHostApi();
+await api.loadModel(modelPath);
+LlamaFlutterApi.setup(TokenPrinter());
+api.generate(prompt);
+```
+
+---
+
+### Final Recommendation Summary
+
+**Tech stack (Jan 2025)**  
+Flutter 3.27 + Pigeon 22.0 + Kotlin 2.0 + AGP 8.7 + NDK r27 + CMake 3.31 + llama.cpp (HEAD)  
+
+**Complexity**  
+Medium – ~2 days for plugin scaffold, 3-4 days for stable streaming, background service & memory tuning.  
+
+**Watch-outs**  
+Android 15 16 KB pages, foreground-service permission, thermal throttling, scoped storage for 8 GB models.
