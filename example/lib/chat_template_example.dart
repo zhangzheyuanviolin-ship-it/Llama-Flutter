@@ -49,6 +49,14 @@ class _ChatScreenState extends State<ChatScreen> {
     
     try {
       // TODO: Replace with actual model path
+      // The plugin will auto-detect the template from the filename
+      // Supported models:
+      // - Qwen2-*.gguf -> ChatML
+      // - Llama-3-*.gguf -> Llama-3 header format
+      // - Llama-2-*.gguf -> Llama-2 format
+      // - QwQ-*.gguf -> QwQ reasoning format
+      // - Mistral-*.gguf -> Mistral format
+      // - Gemma-*.gguf -> Gemma format
       await _controller.loadModel(
         modelPath: '/storage/emulated/0/Download/Qwen2-0.5B-Instruct-Q4_K_M.gguf',
         threads: 4,
@@ -65,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Model loaded successfully!')),
+          const SnackBar(content: Text('Model loaded successfully! Template auto-detected.')),
         );
       }
     } catch (e) {

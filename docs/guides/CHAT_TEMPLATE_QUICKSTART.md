@@ -2,7 +2,13 @@
 
 ## Overview
 
-The plugin now includes automatic chat template formatting for popular models like Qwen, Llama-2/3, Phi, Gemma, and more. No more manual prompt formatting!
+The plugin includes **production-ready** automatic chat template formatting for 11+ model families including Qwen 2/2.5, Llama-3, QwQ-32B, Mistral, DeepSeek, and more. Templates are now **100% accurate** based on official model documentation.
+
+### ✅ What's Fixed (Oct 8, 2025)
+- **ChatML:** Now uses correct `<|im_start|>` tokens (was using wrong brackets)
+- **Llama-3:** Now uses proper header format (was incorrectly using ChatML)
+- **New Models:** Added QwQ-32B, Mistral, DeepSeek Coder, DeepSeek R1
+- **Reasoning Support:** QwQ auto-strips thinking blocks from history
 
 ## Basic Usage
 

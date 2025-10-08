@@ -6,8 +6,8 @@ The `llama_flutter_android` plugin now includes built-in support for popular cha
 
 ## Supported Templates
 
-### 1. ChatML (Qwen, Llama-3, Command-R)
-**Models:** Qwen, Qwen2, Llama-3, Command-R
+### 1. ChatML (Qwen 2/2.5, Command-R)
+**Models:** Qwen 2, Qwen 2.5, Command-R, Hermes
 
 **Format:**
 ```
@@ -18,19 +18,135 @@ Hello!<|im_end|>
 <|im_start|>assistant
 ```
 
-### 2. Llama-2
+**Special tokens:**
+- Start: `<|im_start|>`
+- End: `<|im_end|>`
+- EOS: `<|endoftext|>` (auto-added by model)
+
+### 2. Llama-3/3.1/3.3
+**Models:** Llama-3, Llama-3.1, Llama-3.3
+
+**Format:**
+```
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+You are a helpful assistant.<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+
+Hello!<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>
+```
+
+**Special tokens:**
+- BOS: `<|begin_of_text|>`
+- Header start: `<|start_header_id|>`
+- Header end: `<|end_header_id|>`
+- EOT: `<|eot_id|>` (End-of-Turn)
+
+### 3. Llama-2
 **Models:** Llama-2, Code Llama
 
 **Format:**
 ```
-[INST] <<SYS>>
+<s>[INST] <<SYS>>
 You are a helpful assistant.
 <</SYS>>
 
-Hello! [/INST]
+Hello! [/INST] Hi there!</s><s>[INST] How are you? [/INST]
 ```
 
-### 3. Alpaca
+**Special tokens:**
+- BOS: `<s>`
+- EOS: `</s>`
+- System delimiters: `<<SYS>>` and `<</SYS>>`
+
+### 4. QwQ-32B (Reasoning Model)
+**Models:** QwQ-32B-Preview
+
+**Format:**
+```
+<|im_start|>user
+Why is the sky blue?<|im_end|>
+<|im_start|>assistant
+<think>
+[Model's chain-of-thought reasoning appears here]
+</think>
+The sky appears blue because...
+```
+
+**Special features:**
+- Uses ChatML base with thinking tags
+- `<think>` tag may need client-side injection during streaming
+- History must exclude `<think>...</think>` blocks for subsequent turns
+
+### 5. Mistral/Mixtral
+**Models:** Mistral-7B, Mixtral-8x7B, Mixtral-8x22B
+
+**Format:**
+```
+<s>[INST] System prompt
+
+Hello! [/INST]Hi there!</s>[INST] How are you? [/INST]
+```
+
+**Special tokens:**
+- BOS: `<s>`
+- EOS: `</s>`
+- No dedicated system token (include in first [INST])
+
+### 6. DeepSeek Coder
+**Models:** DeepSeek-Coder-V2, DeepSeek-Coder-V3.1
+
+**Format:**
+```
+<｜begin▁of▁sentence｜>You are an expert programmer. User: Write a function
+Assistant: Here's the function...
+```
+
+### 7. DeepSeek R1 (Reasoning)
+**Models:** DeepSeek-R1, DeepSeek-V3.1
+
+**Format:**
+```
+<｜begin▁of▁sentence｜>You are helpful.<｜User｜>Question<｜Assistant｜></think>Answer
+```
+
+**Special features:**
+- Includes `</think>` even in non-thinking mode
+- Supports thinking mode with `<think>reasoning</think>` blocks
+
+### 8. Gemma/Gemma 2
+**Models:** Gemma, Gemma 2, CodeGemma
+
+**Format:**
+```
+<start_of_turn>user
+Hello!<end_of_turn>
+<start_of_turn>model
+Hi there!<end_of_turn><eos>
+<start_of_turn>user
+How are you?<end_of_turn>
+<start_of_turn>model
+```
+
+**Special tokens:**
+- Turn start: `<start_of_turn>`
+- Turn end: `<end_of_turn>`
+- EOS: `<eos>` (Gemma 2 uses dual termination)
+
+### 9. Phi-2/Phi-3
+**Models:** Phi-2, Phi-3, Phi-3.5
+
+**Format:**
+```
+<|system|>
+You are a helpful assistant.<|end|>
+<|user|>
+Hello!<|end|>
+<|assistant|>
+```
+
+### 10. Alpaca
 **Models:** Alpaca, Alpaca-LoRA
 
 **Format:**
@@ -43,7 +159,7 @@ Hello!
 ### Response:
 ```
 
-### 4. Vicuna
+### 11. Vicuna
 **Models:** Vicuna, Wizard-Vicuna
 
 **Format:**
@@ -52,28 +168,6 @@ A chat between a curious user and an artificial intelligence assistant.
 
 USER: Hello!
 ASSISTANT:
-```
-
-### 5. Phi
-**Models:** Phi-2, Phi-3
-
-**Format:**
-```
-<|system|>
-You are a helpful assistant.<|end|>
-<|user|>
-Hello!<|end|>
-<|assistant|>
-```
-
-### 6. Gemma
-**Models:** Gemma, CodeGemma
-
-**Format:**
-```
-<start_of_turn>user
-Hello!<end_of_turn>
-<start_of_turn>model
 ```
 
 ## Usage
