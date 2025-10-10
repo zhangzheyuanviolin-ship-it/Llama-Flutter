@@ -125,6 +125,16 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     });
     
+    // Listen to model unload events (for auto-unload)
+    debugPrint('[UI] Setting up model unload listener');
+    _chatService.modelUnloadStream.listen((_) {
+      debugPrint('[UI] Model unload event received');
+      setState(() {
+        _isModelLoaded = false;
+        _statusMessage = 'Model unloaded automatically due to inactivity.';
+      });
+    });
+    
     debugPrint('[UI] ===== App initialization complete =====');
   }
 
