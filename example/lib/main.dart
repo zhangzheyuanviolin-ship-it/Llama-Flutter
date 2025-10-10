@@ -61,31 +61,31 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _initializeApp() async {
-    print('[UI] ===== Initializing app =====');
+    debugPrint('[UI] ===== Initializing app =====');
     
     setState(() {
       _statusMessage = 'Checking for existing model...';
     });
 
-    print('[UI] Calling chatService.initialize()...');
+    debugPrint('[UI] Calling chatService.initialize()...');
     final modelExists = await _chatService.initialize();
-    print('[UI] Initialize result: modelExists = $modelExists');
+    debugPrint('[UI] Initialize result: modelExists = $modelExists');
 
     if (modelExists) {
-      print('[UI] Model exists, ready to load');
+      debugPrint('[UI] Model exists, ready to load');
       setState(() {
         _statusMessage = 'Model found. Ready to load.';
       });
       _loadModel();
     } else {
-      print('[UI] No valid model found');
+      debugPrint('[UI] No valid model found');
       setState(() {
         _statusMessage = 'No valid model found. Tap "Load from Local" to select your downloaded model file.';
       });
     }
 
     // Listen to message stream
-    print('[UI] Setting up message stream listener');
+    debugPrint('[UI] Setting up message stream listener');
     _chatService.messageStream.listen((token) {
       setState(() {
         if (token.startsWith('User:')) {
@@ -117,19 +117,19 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     
     // Listen to generating state changes
-    print('[UI] Setting up generating state listener');
+    debugPrint('[UI] Setting up generating state listener');
     _chatService.generatingStateStream.listen((isGenerating) {
-      print('[UI] Generation state changed: $isGenerating');
+      debugPrint('[UI] Generation state changed: $isGenerating');
       setState(() {
         // Force UI rebuild when generation state changes
       });
     });
     
-    print('[UI] ===== App initialization complete =====');
+    debugPrint('[UI] ===== App initialization complete =====');
   }
 
   Future<void> _downloadModel() async {
-    print('[UI] ===== Download model triggered =====');
+    debugPrint('[UI] ===== Download model triggered =====');
     
     setState(() {
       _isLoading = true;
@@ -137,28 +137,28 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      print('[UI] Calling chatService.downloadModel()...');
+      debugPrint('[UI] Calling chatService.downloadModel()...');
       await _chatService.downloadModel(
         onProgress: (progress) {
-          print('[UI] Download progress: ${progress.toStringAsFixed(1)}%');
+          debugPrint('[UI] Download progress: ${progress.toStringAsFixed(1)}%');
           setState(() {
             _downloadProgress = progress;
           });
         },
         onStatus: (status) {
-          print('[UI] Download status: $status');
+          debugPrint('[UI] Download status: $status');
           setState(() {
             _statusMessage = status;
           });
         },
       );
 
-      print('[UI] ✓ Download complete, loading model...');
+      debugPrint('[UI] ✓ Download complete, loading model...');
       // Model downloaded, now load it
       _loadModel();
     } catch (e) {
-      print('[UI] ✗✗✗ Download failed: $e');
-      print('[UI] Stack trace: ${StackTrace.current}');
+      debugPrint('[UI] ✗✗✗ Download failed: $e');
+      debugPrint('[UI] Stack trace: ${StackTrace.current}');
       setState(() {
         _statusMessage = 'Download failed: $e';
       });
@@ -166,12 +166,12 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isLoading = false;
       });
-      print('[UI] ===== Download model complete =====');
+      debugPrint('[UI] ===== Download model complete =====');
     }
   }
 
   Future<void> _loadFromLocal() async {
-    print('[UI] ===== Load from local triggered =====');
+    debugPrint('[UI] ===== Load from local triggered =====');
     
     setState(() {
       _isLoading = true;
@@ -179,31 +179,31 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      print('[UI] Calling chatService.pickLocalModel()...');
+      debugPrint('[UI] Calling chatService.pickLocalModel()...');
       final modelPath = await _chatService.pickLocalModel();
-      print('[UI] pickLocalModel returned: $modelPath');
+      debugPrint('[UI] pickLocalModel returned: $modelPath');
       
       if (modelPath != null) {
         final fileName = modelPath.split('/').last.split('\\').last;
-        print('[UI] ✓ Model selected: $fileName');
-        print('[UI] Full path: $modelPath');
+        debugPrint('[UI] ✓ Model selected: $fileName');
+        debugPrint('[UI] Full path: $modelPath');
         
         setState(() {
           _statusMessage = 'Model selected: $fileName';
         });
         
         // Automatically load the selected model
-        print('[UI] Automatically loading the selected model...');
+        debugPrint('[UI] Automatically loading the selected model...');
         await _loadModel();
       } else {
-        print('[UI] ✗ No model file selected');
+        debugPrint('[UI] ✗ No model file selected');
         setState(() {
           _statusMessage = 'No model file selected';
         });
       }
     } catch (e) {
-      print('[UI] ✗✗✗ Error in _loadFromLocal: $e');
-      print('[UI] Stack trace: ${StackTrace.current}');
+      debugPrint('[UI] ✗✗✗ Error in _loadFromLocal: $e');
+      debugPrint('[UI] Stack trace: ${StackTrace.current}');
       setState(() {
         _statusMessage = 'Error selecting model: $e';
       });
@@ -211,15 +211,15 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isLoading = false;
       });
-      print('[UI] ===== Load from local complete =====');
+      debugPrint('[UI] ===== Load from local complete =====');
     }
   }
 
     Future<void> _loadModel() async {
-    print('[UI] ===== Load model triggered =====');
+    debugPrint('[UI] ===== Load model triggered =====');
     
     if (_chatService.isLoadingModel) {
-      print('[UI] ⚠ Model is already loading, returning');
+      debugPrint('[UI] ⚠ Model is already loading, returning');
       return;
     }
 
@@ -228,28 +228,28 @@ class _ChatScreenState extends State<ChatScreen> {
       _statusMessage = 'Loading model...';
     });
     
-    print('[UI] Current model path: ${_chatService.modelPath}');
+    debugPrint('[UI] Current model path: ${_chatService.modelPath}');
 
     try {
-      print('[UI] Calling chatService.loadModel()...');
+      debugPrint('[UI] Calling chatService.loadModel()...');
       await _chatService.loadModel(
         onProgress: (progress) {
-          print('[UI] Progress callback: ${progress.toStringAsFixed(1)}%');
+          debugPrint('[UI] Progress callback: ${progress.toStringAsFixed(1)}%');
           setState(() {
             _downloadProgress = progress;
           });
         },
         onStatus: (status) {
-          print('[UI] Status callback: $status');
+          debugPrint('[UI] Status callback: $status');
           setState(() {
             _statusMessage = status;
           });
         },
       );
 
-      print('[UI] loadModel completed, checking if model is loaded...');
+      debugPrint('[UI] loadModel completed, checking if model is loaded...');
       final isLoaded = await _chatService.isModelLoaded();
-      print('[UI] isModelLoaded result: $isLoaded');
+      debugPrint('[UI] isModelLoaded result: $isLoaded');
       
       setState(() {
         _isModelLoaded = isLoaded;
@@ -257,13 +257,13 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       
       if (_isModelLoaded) {
-        print('[UI] ✓✓✓ Model loaded successfully! Ready for chat.');
+        debugPrint('[UI] ✓✓✓ Model loaded successfully! Ready for chat.');
       } else {
-        print('[UI] ✗ Model failed to load');
+        debugPrint('[UI] ✗ Model failed to load');
       }
     } catch (e) {
-      print('[UI] ✗✗✗ Error in _loadModel: $e');
-      print('[UI] Stack trace: ${StackTrace.current}');
+      debugPrint('[UI] ✗✗✗ Error in _loadModel: $e');
+      debugPrint('[UI] Stack trace: ${StackTrace.current}');
       setState(() {
         _statusMessage = 'Failed to load model: $e';
       });
@@ -271,12 +271,12 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isLoading = false;
       });
-      print('[UI] ===== Load model complete =====');
+      debugPrint('[UI] ===== Load model complete =====');
     }
   }
 
   Future<void> _unloadModel() async {
-    print('[UI] ===== Unload model triggered =====');
+    debugPrint('[UI] ===== Unload model triggered =====');
     
     setState(() {
       _isLoading = true;
@@ -284,7 +284,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     try {
-      print('[UI] Calling chatService.unloadModel()...');
+      debugPrint('[UI] Calling chatService.unloadModel()...');
       await _chatService.unloadModel();
       
       setState(() {
@@ -292,9 +292,9 @@ class _ChatScreenState extends State<ChatScreen> {
         _statusMessage = 'Model unloaded. You can load a new model.';
       });
       
-      print('[UI] ✓ Model unloaded successfully');
+      debugPrint('[UI] ✓ Model unloaded successfully');
     } catch (e) {
-      print('[UI] ✗✗✗ Error unloading model: $e');
+      debugPrint('[UI] ✗✗✗ Error unloading model: $e');
       setState(() {
         _statusMessage = 'Error unloading model: $e';
       });
@@ -302,7 +302,7 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _isLoading = false;
       });
-      print('[UI] ===== Unload model complete =====');
+      debugPrint('[UI] ===== Unload model complete =====');
     }
   }
 
@@ -385,7 +385,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _clearChat() {
-    print('[UI] ===== Clear chat triggered =====');
+    debugPrint('[UI] ===== Clear chat triggered =====');
     
     showDialog(
       context: context,
@@ -405,7 +405,7 @@ class _ChatScreenState extends State<ChatScreen> {
               });
               _chatService.clearHistory();
               Navigator.pop(context);
-              print('[UI] ✓ Chat cleared');
+              debugPrint('[UI] ✓ Chat cleared');
             },
             child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
@@ -415,20 +415,20 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _stopGeneration() async {
-    print('[UI] ===== Stop generation triggered =====');
+    debugPrint('[UI] ===== Stop generation triggered =====');
     
     if (!_chatService.isGenerating) {
-      print('[UI] ⚠ No generation in progress');
+      debugPrint('[UI] ⚠ No generation in progress');
       return;
     }
     
     try {
       await _chatService.stopGeneration();
-      print('[UI] ✓ Generation stopped successfully');
+      debugPrint('[UI] ✓ Generation stopped successfully');
       
       // Force UI rebuild to update button state
       setState(() {
-        print('[UI] UI state updated after stop');
+        debugPrint('[UI] UI state updated after stop');
       });
       
       // Show feedback
@@ -442,40 +442,40 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
     } catch (e) {
-      print('[UI] ✗ Error stopping generation: $e');
+      debugPrint('[UI] ✗ Error stopping generation: $e');
       setState(() {
-        print('[UI] UI state updated after error');
+        debugPrint('[UI] UI state updated after error');
       });
     }
     
-    print('[UI] ===== Stop generation complete =====');
+    debugPrint('[UI] ===== Stop generation complete =====');
   }
 
   void _sendMessage() async {
-    print('[UI] ===== Send message triggered =====');
+    debugPrint('[UI] ===== Send message triggered =====');
     
     final text = _textController.text.trim();
-    print('[UI] Message text: "$text"');
+    debugPrint('[UI] Message text: "$text"');
     
     if (text.isEmpty) {
-      print('[UI] ✗ Message is empty, returning');
+      debugPrint('[UI] ✗ Message is empty, returning');
       return;
     }
     
     if (_chatService.isGenerating) {
-      print('[UI] ⚠ Already generating, returning');
+      debugPrint('[UI] ⚠ Already generating, returning');
       return;
     }
     
     if (!_isModelLoaded) {
-      print('[UI] ✗ Model not loaded, returning');
+      debugPrint('[UI] ✗ Model not loaded, returning');
       return;
     }
 
-    print('[UI] Clearing text field and sending message to chatService...');
+    debugPrint('[UI] Clearing text field and sending message to chatService...');
     _textController.clear();
     _chatService.sendMessage(text);
-    print('[UI] ===== Send message complete =====');
+    debugPrint('[UI] ===== Send message complete =====');
   }
 
   void _scrollToBottom() {
