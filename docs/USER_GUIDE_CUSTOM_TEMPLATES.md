@@ -19,7 +19,7 @@
    - Use the placeholders: `{system}`, `{user}`, `{assistant}`
    - See examples below for common formats
 
-5. **Click "Create"**
+5. **Click "Create"**ddd
    - Template is automatically saved and registered
    - You'll see a green success message
 
