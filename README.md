@@ -36,8 +36,8 @@ Add to your \pubspec.yaml\:
 dependencies:
   llama_flutter_android:
     git:
-      url: https://github.com/dragneel2074/llama_flutter_android.git
-      ref: main
+      url: https://github.com/dragneel2074/Llama-Flutter.git
+      ref: master
 \\\
 
 ## Quick Start

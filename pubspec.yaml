@@ -1,9 +1,9 @@
 name: llama_flutter_android
 description: Run GGUF models on Android with llama.cpp - MIT licensed, Android-only Flutter plugin
 version: 0.1.0
-homepage: https://github.com/dragneel2074/llama_flutter_android
-repository: https://github.com/dragneel2074/llama_flutter_android
-issue_tracker: https://github.com/dragneel2074/llama_flutter_android/issues
+homepage: https://github.com/dragneel2074/Llama-Flutter
+repository: https://github.com/dragneel2074/Llama-Flutter
+issue_tracker: https://github.com/dragneel2074/Llama-Flutter/issues
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
