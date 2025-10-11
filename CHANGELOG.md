@@ -91,3 +91,8 @@
 
 ### Notes
 This is a development release. The API may change before 1.0.0. Testing on real devices is recommended before production use.
+
+## 0.1.1 (October 11, 2025)
+
+### Changed
+- Updated package description on pub.dev to clarify Android-only plugin scope and features
